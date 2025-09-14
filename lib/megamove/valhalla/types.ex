@@ -7,14 +7,14 @@ defmodule Megamove.Valhalla.Types do
   @type location :: %{lat: float(), lon: float()}
   @type costing :: String.t()
 
-  @type maneuver_type :: 
-    :start | :start_right | :start_left | :destination | :destination_right | 
-    :destination_left | :becomes | :continue | :slight_right | :right | 
-    :sharp_right | :uturn_right | :uturn_left | :sharp_left | :left | 
-    :slight_left | :ramp_straight | :ramp_right | :ramp_left | :exit_right | 
-    :exit_left | :stay_straight | :stay_right | :stay_left | :merge | 
-    :roundabout_enter | :roundabout_exit | :ferry_enter | :ferry_exit | 
-    :transit | :transit_transfer | :transit_remain_on | :transit_connection_start | 
+  @type maneuver_type ::
+    :start | :start_right | :start_left | :destination | :destination_right |
+    :destination_left | :becomes | :continue | :slight_right | :right |
+    :sharp_right | :uturn_right | :uturn_left | :sharp_left | :left |
+    :slight_left | :ramp_straight | :ramp_right | :ramp_left | :exit_right |
+    :exit_left | :stay_straight | :stay_right | :stay_left | :merge |
+    :roundabout_enter | :roundabout_exit | :ferry_enter | :ferry_exit |
+    :transit | :transit_transfer | :transit_remain_on | :transit_connection_start |
     :transit_connection_transfer | :transit_connection_destination | :post_transit_connection_destination
 
   @type maneuver :: %{
@@ -111,16 +111,16 @@ defmodule Megamove.Valhalla.Types do
     available_actions: [String.t()]
   }
 
-  @type valhalla_response :: 
-    route_response() | 
-    isochrone_response() | 
-    sources_to_targets_response() | 
-    reverse_geocode_response() | 
+  @type valhalla_response ::
+    route_response() |
+    isochrone_response() |
+    sources_to_targets_response() |
+    reverse_geocode_response() |
     status_response()
 
-  @type valhalla_error :: 
-    {:http_error, integer(), map()} | 
-    {:network_error, term()} | 
+  @type valhalla_error ::
+    {:http_error, integer(), map()} |
+    {:network_error, term()} |
     {:timeout, term()}
 
   @type valhalla_result :: {:ok, valhalla_response()} | {:error, valhalla_error()}

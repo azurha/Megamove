@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          🚀 Démonstration Valhalla
+          🚀 Test API Valhalla
         </h1>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-          Testez les fonctionnalités d'optimisation d'itinéraires de Valhalla pour votre marketplace de transport
+          Test des fonctionnalités de l'API Valhalla selon la documentation officielle
         </p>
       </div>
 
@@ -91,6 +91,36 @@
             </div>
           </div>
 
+          <!-- Exemples de test -->
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+              🧪 Exemples de test
+            </h2>
+            
+            <div class="space-y-3">
+              <button
+                phx-click="load_example_detroit_buffalo"
+                class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                Exemple Detroit → Buffalo (Documentation)
+              </button>
+              
+              <button
+                phx-click="load_example_paris"
+                class="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                Exemple Paris (3 points)
+              </button>
+              
+              <button
+                phx-click="load_example_nyc"
+                class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                Exemple NYC Multimodal
+              </button>
+            </div>
+          </div>
+
           <!-- Current Locations -->
           <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
@@ -139,7 +169,7 @@
           <!-- Actions -->
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">
-              ⚡ Actions
+              ⚡ Actions de test
             </h2>
             
             <div class="space-y-3">
@@ -148,7 +178,23 @@
                 disabled={length(@locations) < 2}
                 class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Calculer l'itinéraire simple
+                Test Route Simple (auto)
+              </button>
+              
+              <button
+                phx-click="calculate_route_bicycle"
+                disabled={length(@locations) < 2}
+                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Test Route Vélo
+              </button>
+              
+              <button
+                phx-click="calculate_route_pedestrian"
+                disabled={length(@locations) < 2}
+                class="w-full bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Test Route Piéton
               </button>
               
               <button
@@ -156,7 +202,7 @@
                 disabled={length(@locations) < 3}
                 class="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Optimiser l'itinéraire (TSP)
+                Test Optimisation TSP
               </button>
               
               <button
@@ -164,7 +210,7 @@
                 disabled={length(@locations) < 1}
                 class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Calculer l'isochrone (15min)
+                Test Isochrone (15min)
               </button>
               
               <%= if @route_result || @optimized_route_result || @isochrone_result do %>
@@ -185,9 +231,19 @@
           <%= if @route_result do %>
             <div class="bg-white rounded-lg shadow-md p-6">
               <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                🛣️ Itinéraire simple
+                🛣️ Résultat de l'API Valhalla
               </h2>
               
+              <!-- Informations de l'API -->
+              <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h3 class="text-sm font-medium text-gray-800 mb-2">Informations de l'API Valhalla</h3>
+                <div class="text-xs text-gray-600 space-y-1">
+                  <p><strong>Status:</strong> <%= @route_result["trip"]["status"] || "N/A" %></p>
+                  <p><strong>Units:</strong> <%= @route_result["trip"]["units"] || "N/A" %></p>
+                  <p><strong>Language:</strong> <%= @route_result["trip"]["language"] || "N/A" %></p>
+                </div>
+              </div>
+
               <%= if trip = @route_result["trip"] do %>
                 <div class="space-y-4">
                   <%= if summary = trip["summary"] do %>
@@ -204,6 +260,25 @@
                           <%= format_duration(summary["time"]) %>
                         </div>
                       </div>
+                    </div>
+                    
+                    <!-- Informations supplémentaires de la documentation -->
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                      <%= if summary["has_toll"] do %>
+                        <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-center">
+                          Péage
+                        </div>
+                      <% end %>
+                      <%= if summary["has_highway"] do %>
+                        <div class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-center">
+                          Autoroute
+                        </div>
+                      <% end %>
+                      <%= if summary["has_ferry"] do %>
+                        <div class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-center">
+                          Ferry
+                        </div>
+                      <% end %>
                     </div>
                   <% end %>
                   
