@@ -1,13 +1,13 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
   <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          🚀 Test API Valhalla
+          🚀 Test API Valhalla - Route
         </h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-          Test des fonctionnalités de l'API Valhalla selon la documentation officielle
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Test de la fonction route entre Dijon et Lyon
         </p>
       </div>
 
@@ -45,178 +45,84 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Left Column: Controls -->
         <div class="space-y-6">
-          <!-- Location Input -->
+          <!-- Points de départ et d'arrivée -->
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">
-              📍 Ajouter des points
+              📍 Points de l'itinéraire
             </h2>
             
             <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Latitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    id="lat-input"
-                    placeholder="48.8566"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+              <%= for {location, index} <- Enum.with_index(@locations) do %>
+                <div class="border border-gray-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-700">
+                      <%= if index == 0, do: "Départ", else: "Arrivée" %>
+                    </span>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                      Point <%= index + 1 %>
+                    </span>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-600 mb-1">
+                        Latitude
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={elem(location, 0)}
+                        phx-blur="update_location"
+                        phx-value-index={index}
+                        phx-value-lat=""
+                        phx-value-lon={elem(location, 1)}
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-600 mb-1">
+                        Longitude
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={elem(location, 1)}
+                        phx-blur="update_location"
+                        phx-value-index={index}
+                        phx-value-lat={elem(location, 0)}
+                        phx-value-lon=""
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div class="mt-2 text-xs text-gray-500">
+                    Coordonnées actuelles : <%= format_coordinate(location) %>
+                  </div>
                 </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Longitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    id="lon-input"
-                    placeholder="2.3522"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              
-              <button
-                phx-click="add_location"
-                phx-value-lat=""
-                phx-value-lon=""
-                onclick="addLocationFromInputs()"
-                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Ajouter le point
-              </button>
-            </div>
-          </div>
-
-          <!-- Exemples de test -->
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">
-              🧪 Exemples de test
-            </h2>
-            
-            <div class="space-y-3">
-              <button
-                phx-click="load_example_detroit_buffalo"
-                class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                Exemple Detroit → Buffalo (Documentation)
-              </button>
-              
-              <button
-                phx-click="load_example_paris"
-                class="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                Exemple Paris (3 points)
-              </button>
-              
-              <button
-                phx-click="load_example_nyc"
-                class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                Exemple NYC Multimodal
-              </button>
-            </div>
-          </div>
-
-          <!-- Current Locations -->
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-semibold text-gray-900">
-                📋 Points sélectionnés (<%= length(@locations) %>)
-              </h2>
-              <%= if length(@locations) > 0 do %>
-                <button
-                  phx-click="clear_locations"
-                  class="text-red-600 hover:text-red-800 text-sm font-medium"
-                >
-                  Effacer tout
-                </button>
               <% end %>
             </div>
-            
-            <%= if @locations == [] do %>
-              <p class="text-gray-500 text-center py-4">
-                Aucun point sélectionné. Ajoutez des coordonnées ci-dessus.
-              </p>
-            <% else %>
-              <div class="space-y-2">
-                <%= for {location, index} <- Enum.with_index(@locations) do %>
-                  <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-                    <div class="flex items-center space-x-3">
-                      <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                        <%= index + 1 %>
-                      </span>
-                      <span class="text-sm text-gray-700">
-                        <%= format_coordinate(location) %>
-                      </span>
-                    </div>
-                    <button
-                      phx-click="remove_location"
-                      phx-value-index={index}
-                      class="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
           </div>
 
-          <!-- Actions -->
+          <!-- Action de test -->
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">
-              ⚡ Actions de test
+              ⚡ Test de l'API
             </h2>
             
             <div class="space-y-3">
               <button
                 phx-click="calculate_route"
                 disabled={length(@locations) < 2}
-                class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                class="w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed text-lg font-medium"
               >
-                Test Route Simple (auto)
+                🚗 Calculer l'itinéraire Dijon → Lyon
               </button>
               
-              <button
-                phx-click="calculate_route_bicycle"
-                disabled={length(@locations) < 2}
-                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                Test Route Vélo
-              </button>
-              
-              <button
-                phx-click="calculate_route_pedestrian"
-                disabled={length(@locations) < 2}
-                class="w-full bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                Test Route Piéton
-              </button>
-              
-              <button
-                phx-click="calculate_optimized_route"
-                disabled={length(@locations) < 3}
-                class="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                Test Optimisation TSP
-              </button>
-              
-              <button
-                phx-click="calculate_isochrone"
-                disabled={length(@locations) < 1}
-                class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                Test Isochrone (15min)
-              </button>
-              
-              <%= if @route_result || @optimized_route_result || @isochrone_result do %>
+              <%= if @route_result do %>
                 <button
                   phx-click="clear_results"
-                  class="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  class="w-full bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   Effacer les résultats
                 </button>
@@ -236,7 +142,7 @@
               
               <!-- Informations de l'API -->
               <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h3 class="text-sm font-medium text-gray-800 mb-2">Informations de l'API Valhalla</h3>
+                <h3 class="text-sm font-medium text-gray-800 mb-2">Informations de l'API</h3>
                 <div class="text-xs text-gray-600 space-y-1">
                   <p><strong>Status:</strong> <%= @route_result["trip"]["status"] || "N/A" %></p>
                   <p><strong>Units:</strong> <%= @route_result["trip"]["units"] || "N/A" %></p>
@@ -248,21 +154,21 @@
                 <div class="space-y-4">
                   <%= if summary = trip["summary"] do %>
                     <div class="grid grid-cols-2 gap-4">
-                      <div class="bg-green-50 rounded-lg p-3">
-                        <div class="text-sm font-medium text-green-800">Distance</div>
-                        <div class="text-lg font-semibold text-green-900">
+                      <div class="bg-green-50 rounded-lg p-4">
+                        <div class="text-sm font-medium text-green-800">Distance totale</div>
+                        <div class="text-2xl font-bold text-green-900">
                           <%= format_distance(summary["length"]) %>
                         </div>
                       </div>
-                      <div class="bg-blue-50 rounded-lg p-3">
-                        <div class="text-sm font-medium text-blue-800">Durée</div>
-                        <div class="text-lg font-semibold text-blue-900">
+                      <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="text-sm font-medium text-blue-800">Durée totale</div>
+                        <div class="text-2xl font-bold text-blue-900">
                           <%= format_duration(summary["time"]) %>
                         </div>
                       </div>
                     </div>
                     
-                    <!-- Informations supplémentaires de la documentation -->
+                    <!-- Informations supplémentaires -->
                     <div class="grid grid-cols-3 gap-2 text-xs">
                       <%= if summary["has_toll"] do %>
                         <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-center">
@@ -285,103 +191,33 @@
                   <%= if legs = trip["legs"] do %>
                     <div class="space-y-2">
                       <h3 class="font-medium text-gray-900">Instructions de navigation :</h3>
-                      <%= for leg <- legs do %>
-                        <%= for maneuver <- leg["maneuvers"] do %>
-                          <div class="bg-gray-50 rounded-lg p-3">
-                            <div class="text-sm text-gray-700">
-                              <%= maneuver["instruction"] %>
-                            </div>
-                            <%= if maneuver["street_names"] && length(maneuver["street_names"]) > 0 do %>
-                              <div class="text-xs text-gray-500 mt-1">
-                                <%= Enum.join(maneuver["street_names"], ", ") %>
+                      <div class="max-h-64 overflow-y-auto space-y-2">
+                        <%= for leg <- legs do %>
+                          <%= for maneuver <- leg["maneuvers"] do %>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                              <div class="text-sm text-gray-700">
+                                <%= maneuver["instruction"] %>
                               </div>
-                            <% end %>
-                            <div class="flex justify-between text-xs text-gray-500 mt-1">
-                              <span><%= format_distance(maneuver["length"]) %></span>
-                              <span><%= format_duration(maneuver["time"]) %></span>
+                              <%= if maneuver["street_names"] && length(maneuver["street_names"]) > 0 do %>
+                                <div class="text-xs text-gray-500 mt-1">
+                                  <%= Enum.join(maneuver["street_names"], ", ") %>
+                                </div>
+                              <% end %>
+                              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span><%= format_distance(maneuver["length"]) %></span>
+                                <span><%= format_duration(maneuver["time"]) %></span>
+                              </div>
                             </div>
-                          </div>
+                          <% end %>
                         <% end %>
-                      <% end %>
+                      </div>
                     </div>
                   <% end %>
                 </div>
               <% end %>
             </div>
-          <% end %>
-
-          <!-- Optimized Route Result -->
-          <%= if @optimized_route_result do %>
-            <div class="bg-white rounded-lg shadow-md p-6">
-              <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                🎯 Itinéraire optimisé (TSP)
-              </h2>
-              
-              <%= if trip = @optimized_route_result["trip"] do %>
-                <div class="space-y-4">
-                  <%= if summary = trip["summary"] do %>
-                    <div class="grid grid-cols-2 gap-4">
-                      <div class="bg-green-50 rounded-lg p-3">
-                        <div class="text-sm font-medium text-green-800">Distance totale</div>
-                        <div class="text-lg font-semibold text-green-900">
-                          <%= format_distance(summary["length"]) %>
-                        </div>
-                      </div>
-                      <div class="bg-blue-50 rounded-lg p-3">
-                        <div class="text-sm font-medium text-blue-800">Durée totale</div>
-                        <div class="text-lg font-semibold text-blue-900">
-                          <%= format_duration(summary["time"]) %>
-                        </div>
-                      </div>
-                    </div>
-                  <% end %>
-                  
-                  <div class="bg-purple-50 rounded-lg p-4">
-                    <div class="text-sm font-medium text-purple-800 mb-2">
-                      Ordre optimisé des visites :
-                    </div>
-                    <%= if locations = trip["locations"] do %>
-                      <div class="space-y-1">
-                        <%= for location <- locations do %>
-                          <div class="text-sm text-purple-700">
-                            <%= location["original_index"] + 1 %>. 
-                            <%= format_coordinate({location["lat"], location["lon"]}) %>
-                          </div>
-                        <% end %>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-
-          <!-- Isochrone Result -->
-          <%= if @isochrone_result do %>
-            <div class="bg-white rounded-lg shadow-md p-6">
-              <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                🕐 Isochrone (15 minutes)
-              </h2>
-              
-              <div class="bg-orange-50 rounded-lg p-4">
-                <div class="text-sm text-orange-800">
-                  Zone accessible en 15 minutes depuis le point sélectionné.
-                  Cette fonctionnalité est parfaite pour définir les zones de service des transporteurs.
-                </div>
-              </div>
-              
-              <div class="mt-4 text-sm text-gray-600">
-                <p>Les données géométriques de l'isochrone sont disponibles dans la réponse JSON.</p>
-                <p class="mt-2">
-                  <strong>Nombre de features :</strong> 
-                  <%= length(@isochrone_result["features"] || []) %>
-                </p>
-              </div>
-            </div>
-          <% end %>
-
-          <!-- No Results -->
-          <%= if !@route_result && !@optimized_route_result && !@isochrone_result do %>
+          <% else %>
+            <!-- No Results -->
             <div class="bg-white rounded-lg shadow-md p-6 text-center">
               <div class="text-gray-400 mb-4">
                 <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -389,10 +225,10 @@
                 </svg>
               </div>
               <h3 class="text-lg font-medium text-gray-900 mb-2">
-                Aucun résultat
+                Prêt pour le test
               </h3>
               <p class="text-gray-500">
-                Sélectionnez des points et lancez un calcul pour voir les résultats ici.
+                Cliquez sur "Calculer l'itinéraire" pour tester l'API Valhalla entre Dijon et Lyon.
               </p>
             </div>
           <% end %>
@@ -401,31 +237,4 @@
     </div>
   </div>
 
-  <script>
-    function addLocationFromInputs() {
-      const latInput = document.getElementById('lat-input');
-      const lonInput = document.getElementById('lon-input');
-      
-      if (latInput.value && lonInput.value) {
-        const event = new CustomEvent('phx:add-location', {
-          detail: {
-            lat: latInput.value,
-            lon: lonInput.value
-          }
-        });
-        window.dispatchEvent(event);
-        
-        latInput.value = '';
-        lonInput.value = '';
-      }
-    }
-    
-    window.addEventListener('phx:add-location', (e) => {
-      const { lat, lon } = e.detail;
-      const button = document.querySelector('[phx-click="add_location"]');
-      button.setAttribute('phx-value-lat', lat);
-      button.setAttribute('phx-value-lon', lon);
-      button.click();
-    });
-  </script>
 </Layouts.app>
