@@ -1,7 +1,5 @@
 ---
 
-# MegaMove
-
 **MegaMove** est une plateforme web de mise en relation entre particuliers souhaitant transporter des biens volumineux (voiture, moto, colis > 30kg, etc.) et des professionnels du transport.  
 L’application offre une gestion complète du cycle de vie de la demande jusqu’au paiement, avec optimisation des trajets.
 
