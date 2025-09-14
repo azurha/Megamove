@@ -14,7 +14,7 @@ defmodule MegamoveWeb.ValhallaDemoLive do
       {47.3220, 5.0415},  # Dijon
       {45.7640, 4.8357}   # Lyon
     ]
-    
+
     {:ok,
      socket
      |> assign(:page_title, "Test API Valhalla - Route Dijon-Lyon")
@@ -29,7 +29,7 @@ defmodule MegamoveWeb.ValhallaDemoLive do
     case {lat, lon} do
       {"", ""} ->
         {:noreply, assign(socket, :error, "Veuillez saisir des coordonnées valides")}
-      
+
       {lat_str, lon_str} when lat_str != "" and lon_str != "" ->
         case {Float.parse(lat_str), Float.parse(lon_str)} do
           {{lat_val, ""}, {lon_val, ""}} ->
@@ -37,11 +37,11 @@ defmodule MegamoveWeb.ValhallaDemoLive do
             new_location = {lat_val, lon_val}
             updated_locations = List.replace_at(socket.assigns.locations, index, new_location)
             {:noreply, socket |> assign(:locations, updated_locations) |> assign(:error, nil)}
-          
+
           _ ->
             {:noreply, assign(socket, :error, "Format de coordonnées invalide")}
         end
-      
+
       _ ->
         {:noreply, assign(socket, :error, "Veuillez saisir les deux coordonnées")}
     end
@@ -72,16 +72,18 @@ defmodule MegamoveWeb.ValhallaDemoLive do
     "#{Float.round(lat, 6)}, #{Float.round(lon, 6)}"
   end
 
-  defp format_duration(seconds) do
-    minutes = div(seconds, 60)
-    hours = div(minutes, 60)
-    remaining_minutes = rem(minutes, 60)
+  defp format_duration(seconds) when is_number(seconds) do
+    total_minutes = trunc(seconds / 60)
+    hours = div(total_minutes, 60)
+    remaining_minutes = rem(total_minutes, 60)
 
     cond do
       hours > 0 -> "#{hours}h #{remaining_minutes}min"
-      true -> "#{minutes}min"
+      true -> "#{total_minutes}min"
     end
   end
+
+  defp format_duration(_), do: "N/A"
 
   defp format_distance(km) do
     if km < 1 do
