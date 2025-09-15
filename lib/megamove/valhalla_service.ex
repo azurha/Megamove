@@ -24,7 +24,10 @@ defmodule Megamove.ValhallaService do
       iex> Megamove.ValhallaService.route([{48.8566, 2.3522}, {48.8606, 2.3376}], costing: "bicycle")
       {:ok, %{trip: %{legs: [...]}}}
   """
-  @spec route(list({float(), float()}), keyword()) :: {:ok, map()} | {:error, term()}
+  @spec route(list({float(), float()}), keyword()) ::
+          {:ok, map()} |
+          {:ok, map(), %{url: String.t(), raw: String.t()}} |
+          {:error, term()}
   def route(locations, opts \\ []) do
     costing = Keyword.get(opts, :costing, "auto")
 
@@ -33,7 +36,7 @@ defmodule Megamove.ValhallaService do
       costing: costing
     }
 
-    make_request("/route", request_body)
+    make_request("/route", request_body, opts)
   end
 
   @doc """
@@ -53,7 +56,7 @@ defmodule Megamove.ValhallaService do
       costing: costing
     }
 
-    make_request("/optimized_route", request_body)
+    make_request("/optimized_route", request_body, opts)
   end
 
   @doc """
@@ -77,7 +80,7 @@ defmodule Megamove.ValhallaService do
       contours: contours
     }
 
-    make_request("/isochrone", request_body)
+    make_request("/isochrone", request_body, opts)
   end
 
   @doc """
@@ -90,7 +93,8 @@ defmodule Megamove.ValhallaService do
       iex> Megamove.ValhallaService.sources_to_targets(sources, targets)
       {:ok, %{sources_to_targets: [...]}}
   """
-  @spec sources_to_targets(list({float(), float()}), list({float(), float()}), keyword()) :: {:ok, map()} | {:error, term()}
+  @spec sources_to_targets(list({float(), float()}), list({float(), float()}), keyword()) ::
+          {:ok, map()} | {:error, term()}
   def sources_to_targets(sources, targets, opts \\ []) do
     costing = Keyword.get(opts, :costing, "auto")
 
@@ -100,7 +104,7 @@ defmodule Megamove.ValhallaService do
       costing: costing
     }
 
-    make_request("/sources_to_targets", request_body)
+    make_request("/sources_to_targets", request_body, opts)
   end
 
   @doc """
@@ -117,7 +121,7 @@ defmodule Megamove.ValhallaService do
       locations: [%{lat: lat, lon: lon}]
     }
 
-    make_request("/locate", request_body)
+    make_request("/locate", request_body, [])
   end
 
   @doc """
@@ -125,27 +129,49 @@ defmodule Megamove.ValhallaService do
   """
   @spec status() :: {:ok, map()} | {:error, term()}
   def status do
-    make_request("/status", %{})
+    make_request("/status", %{}, [])
   end
 
   # Fonctions privées
 
-  defp make_request(endpoint, body) do
+  defp make_request(endpoint, body, opts) do
     url = @base_url <> endpoint
+    debug? = Keyword.get(opts, :debug, false)
 
-    case Req.post(url,
-      json: body,
-      receive_timeout: @timeout,
-      retry: :transient
-    ) do
-      {:ok, %{status: 200, body: response}} ->
-        {:ok, response}
+    if debug? do
+      case Req.post(url,
+             json: body,
+             receive_timeout: @timeout,
+             retry: :transient,
+             decode_body: false
+           ) do
+        {:ok, %{status: 200, body: raw_body}} ->
+          case Jason.decode(raw_body) do
+            {:ok, parsed} -> {:ok, parsed, %{url: url, raw: raw_body}}
+            {:error, _} -> {:error, {:decode_error, url, raw_body}}
+          end
 
-      {:ok, %{status: status, body: body}} ->
-        {:error, {:http_error, status, body}}
+        {:ok, %{status: status, body: raw_body}} ->
+          {:error, {:http_error, status, raw_body, url}}
 
-      {:error, reason} ->
-        {:error, reason}
+        {:error, reason} ->
+          {:error, reason}
+      end
+    else
+      case Req.post(url,
+             json: body,
+             receive_timeout: @timeout,
+             retry: :transient
+           ) do
+        {:ok, %{status: 200, body: response}} ->
+          {:ok, response}
+
+        {:ok, %{status: status, body: body}} ->
+          {:error, {:http_error, status, body}}
+
+        {:error, reason} ->
+          {:error, reason}
+      end
     end
   end
 end

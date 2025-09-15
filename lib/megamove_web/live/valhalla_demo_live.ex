@@ -11,8 +11,10 @@ defmodule MegamoveWeb.ValhallaDemoLive do
   def mount(_params, _session, socket) do
     # Points par défaut : Dijon et Lyon
     default_locations = [
-      {47.3220, 5.0415},  # Dijon
-      {45.7640, 4.8357}   # Lyon
+      # Dijon
+      {47.3220, 5.0415},
+      # Lyon
+      {45.7640, 4.8357}
     ]
 
     {:ok,
@@ -21,7 +23,10 @@ defmodule MegamoveWeb.ValhallaDemoLive do
      |> assign(:locations, default_locations)
      |> assign(:route_result, nil)
      |> assign(:loading, false)
-     |> assign(:error, nil)}
+     |> assign(:error, nil)
+     |> assign(:request_url, nil)
+     |> assign(:raw_response, nil)
+     |> assign(:map_shape, nil)}
   end
 
   @impl true
@@ -36,7 +41,9 @@ defmodule MegamoveWeb.ValhallaDemoLive do
             index = String.to_integer(index)
             new_location = {lat_val, lon_val}
             updated_locations = List.replace_at(socket.assigns.locations, index, new_location)
-            {:noreply, socket |> assign(:locations, updated_locations) |> assign(:error, nil)}
+            socket = socket |> assign(:locations, updated_locations) |> assign(:error, nil)
+
+            {:noreply, socket}
 
           _ ->
             {:noreply, assign(socket, :error, "Format de coordonnées invalide")}
@@ -52,20 +59,66 @@ defmodule MegamoveWeb.ValhallaDemoLive do
     if length(socket.assigns.locations) >= 2 do
       socket = socket |> assign(:loading, true) |> assign(:error, nil)
 
-      case ValhallaService.route(socket.assigns.locations) do
+      case ValhallaService.route(socket.assigns.locations, debug: true) do
+        {:ok, result, %{url: url, raw: raw_body}} ->
+          shape = extract_shape(result)
+
+          socket =
+            socket
+            |> assign(:route_result, result)
+            |> assign(:request_url, url)
+            |> assign(:raw_response, raw_body)
+            |> assign(:map_shape, shape)
+            |> assign(:loading, false)
+
+          socket = socket
+
+          {:noreply, socket}
+
         {:ok, result} ->
-          {:noreply, socket |> assign(:route_result, result) |> assign(:loading, false)}
+          shape = extract_shape(result)
+
+          socket =
+            socket
+            |> assign(:route_result, result)
+            |> assign(:request_url, nil)
+            |> assign(:raw_response, nil)
+            |> assign(:map_shape, shape)
+            |> assign(:loading, false)
+
+          socket = socket
+
+          {:noreply, socket}
+
+        {:error, {:http_error, status, body, url}} ->
+          {:noreply,
+           socket
+           |> assign(:error, "Erreur HTTP #{status} lors du calcul de l'itinéraire")
+           |> assign(:request_url, url)
+           |> assign(:raw_response, body)
+           |> assign(:loading, false)}
+
         {:error, reason} ->
-          {:noreply, socket |> assign(:error, "Erreur lors du calcul de l'itinéraire: #{inspect(reason)}") |> assign(:loading, false)}
+          {:noreply,
+           socket
+           |> assign(:error, "Erreur lors du calcul de l'itinéraire: #{inspect(reason)}")
+           |> assign(:loading, false)}
       end
     else
-      {:noreply, assign(socket, :error, "Au moins 2 points sont nécessaires pour calculer un itinéraire")}
+      {:noreply,
+       assign(socket, :error, "Au moins 2 points sont nécessaires pour calculer un itinéraire")}
     end
   end
 
   @impl true
   def handle_event("clear_results", _params, socket) do
-    {:noreply, socket |> assign(:route_result, nil) |> assign(:error, nil)}
+    {:noreply,
+     socket
+     |> assign(:route_result, nil)
+     |> assign(:error, nil)
+     |> assign(:request_url, nil)
+     |> assign(:raw_response, nil)
+     |> assign(:map_shape, nil)}
   end
 
   defp format_coordinate({lat, lon}) do
@@ -91,5 +144,31 @@ defmodule MegamoveWeb.ValhallaDemoLive do
     else
       "#{Float.round(km, 2)}km"
     end
+  end
+
+  defp extract_shape(%{"trip" => %{"legs" => [first_leg | _]}}) do
+    Map.get(first_leg, "shape")
+  end
+
+  defp extract_shape(_), do: nil
+
+  defp push_shape_update(socket) do
+    locations = socket.assigns.locations
+    shape = socket.assigns.map_shape
+
+    socket =
+      case locations do
+        [{s_lat, s_lon}, {e_lat, e_lon} | _] ->
+          push_event(socket, "update_map", %{
+            start: %{lat: s_lat, lon: s_lon},
+            end: %{lat: e_lat, lon: e_lon},
+            shape: shape
+          })
+
+        _ ->
+          socket
+      end
+
+    socket
   end
 end

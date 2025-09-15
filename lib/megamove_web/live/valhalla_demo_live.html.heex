@@ -10,14 +10,18 @@
           Test de la fonction route entre Dijon et Lyon
         </p>
       </div>
-
-      <!-- Error Alert -->
+      
+<!-- Error Alert -->
       <%= if @error do %>
         <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="flex">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
               </svg>
             </div>
             <div class="ml-3">
@@ -25,14 +29,14 @@
                 Erreur
               </h3>
               <div class="mt-2 text-sm text-red-700">
-                <p><%= @error %></p>
+                <p>{@error}</p>
               </div>
             </div>
           </div>
         </div>
       <% end %>
-
-      <!-- Loading Indicator -->
+      
+<!-- Loading Indicator -->
       <%= if @loading do %>
         <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div class="flex items-center">
@@ -50,19 +54,19 @@
             <h2 class="text-xl font-semibold text-gray-900 mb-4">
               📍 Points de l'itinéraire
             </h2>
-            
+
             <div class="space-y-4">
               <%= for {location, index} <- Enum.with_index(@locations) do %>
                 <div class="border border-gray-200 rounded-lg p-4">
                   <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-700">
-                      <%= if index == 0, do: "Départ", else: "Arrivée" %>
+                      {if index == 0, do: "Départ", else: "Arrivée"}
                     </span>
                     <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                      Point <%= index + 1 %>
+                      Point {index + 1}
                     </span>
                   </div>
-                  
+
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label class="block text-xs font-medium text-gray-600 mb-1">
@@ -95,21 +99,21 @@
                       />
                     </div>
                   </div>
-                  
+
                   <div class="mt-2 text-xs text-gray-500">
-                    Coordonnées actuelles : <%= format_coordinate(location) %>
+                    Coordonnées actuelles : {format_coordinate(location)}
                   </div>
                 </div>
               <% end %>
             </div>
           </div>
-
-          <!-- Action de test -->
+          
+<!-- Action de test -->
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">
               ⚡ Test de l'API
             </h2>
-            
+
             <div class="space-y-3">
               <button
                 phx-click="calculate_route"
@@ -118,7 +122,7 @@
               >
                 🚗 Calculer l'itinéraire Dijon → Lyon
               </button>
-              
+
               <%= if @route_result do %>
                 <button
                   phx-click="clear_results"
@@ -130,23 +134,64 @@
             </div>
           </div>
         </div>
-
-        <!-- Right Column: Results -->
+        
+<!-- Right Column: Results -->
         <div class="space-y-6">
-          <!-- Route Result -->
+          <!-- Map Container -->
+          <div class="bg-white rounded-lg shadow-md p-4">
+            <h2 class="text-xl font-semibold text-gray-900 mb-3">🗺️ Carte</h2>
+            <.live_component
+              module={MegamoveWeb.MapComponent}
+              id="valhalla-map"
+              markers={[
+                %{lat: elem(Enum.at(@locations, 0), 0), lon: elem(Enum.at(@locations, 0), 1), label: "Départ"},
+                %{lat: elem(Enum.at(@locations, 1), 0), lon: elem(Enum.at(@locations, 1), 1), label: "Arrivée"}
+              ]}
+              polylines={[
+                %{shape: @route_result && @route_result["trip"] && @route_result["trip"]["legs"] && (@route_result["trip"]["legs"] |> Enum.at(0) |> then(&(&1 && &1["shape"]))) || nil}
+              ]}
+            />
+          </div>
+          <!-- Debug: URL & Raw Response -->
+          <%= if @request_url || @raw_response do %>
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h2 class="text-xl font-semibold text-gray-900 mb-4">🔎 Détails de la requête</h2>
+
+              <div class="space-y-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-700 mb-1">URL de la requête</div>
+                  <div class="text-xs text-gray-600 break-all bg-gray-50 border border-gray-200 rounded p-2">
+                    {@request_url || "N/A"}
+                  </div>
+                </div>
+
+                <div>
+                  <div class="text-sm font-medium text-gray-700 mb-1">Réponse brute</div>
+                  <pre
+                    class="text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded p-3 overflow-x-auto whitespace-pre-wrap"
+                    phx-no-curly-interpolation
+                  >
+<%= @raw_response || "N/A" %>
+                  </pre>
+                </div>
+              </div>
+            </div>
+          <% end %>
+          
+<!-- Route Result -->
           <%= if @route_result do %>
             <div class="bg-white rounded-lg shadow-md p-6">
               <h2 class="text-xl font-semibold text-gray-900 mb-4">
                 🛣️ Résultat de l'API Valhalla
               </h2>
               
-              <!-- Informations de l'API -->
+<!-- Informations de l'API -->
               <div class="bg-gray-50 rounded-lg p-4 mb-4">
                 <h3 class="text-sm font-medium text-gray-800 mb-2">Informations de l'API</h3>
                 <div class="text-xs text-gray-600 space-y-1">
-                  <p><strong>Status:</strong> <%= @route_result["trip"]["status"] || "N/A" %></p>
-                  <p><strong>Units:</strong> <%= @route_result["trip"]["units"] || "N/A" %></p>
-                  <p><strong>Language:</strong> <%= @route_result["trip"]["language"] || "N/A" %></p>
+                  <p><strong>Status:</strong> {@route_result["trip"]["status"] || "N/A"}</p>
+                  <p><strong>Units:</strong> {@route_result["trip"]["units"] || "N/A"}</p>
+                  <p><strong>Language:</strong> {@route_result["trip"]["language"] || "N/A"}</p>
                 </div>
               </div>
 
@@ -157,18 +202,18 @@
                       <div class="bg-green-50 rounded-lg p-4">
                         <div class="text-sm font-medium text-green-800">Distance totale</div>
                         <div class="text-2xl font-bold text-green-900">
-                          <%= format_distance(summary["length"]) %>
+                          {format_distance(summary["length"])}
                         </div>
                       </div>
                       <div class="bg-blue-50 rounded-lg p-4">
                         <div class="text-sm font-medium text-blue-800">Durée totale</div>
                         <div class="text-2xl font-bold text-blue-900">
-                          <%= format_duration(summary["time"]) %>
+                          {format_duration(summary["time"])}
                         </div>
                       </div>
                     </div>
                     
-                    <!-- Informations supplémentaires -->
+<!-- Informations supplémentaires -->
                     <div class="grid grid-cols-3 gap-2 text-xs">
                       <%= if summary["has_toll"] do %>
                         <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-center">
@@ -187,7 +232,7 @@
                       <% end %>
                     </div>
                   <% end %>
-                  
+
                   <%= if legs = trip["legs"] do %>
                     <div class="space-y-2">
                       <h3 class="font-medium text-gray-900">Instructions de navigation :</h3>
@@ -196,16 +241,16 @@
                           <%= for maneuver <- leg["maneuvers"] do %>
                             <div class="bg-gray-50 rounded-lg p-3">
                               <div class="text-sm text-gray-700">
-                                <%= maneuver["instruction"] %>
+                                {maneuver["instruction"]}
                               </div>
                               <%= if maneuver["street_names"] && length(maneuver["street_names"]) > 0 do %>
                                 <div class="text-xs text-gray-500 mt-1">
-                                  <%= Enum.join(maneuver["street_names"], ", ") %>
+                                  {Enum.join(maneuver["street_names"], ", ")}
                                 </div>
                               <% end %>
                               <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                <span><%= format_distance(maneuver["length"]) %></span>
-                                <span><%= format_duration(maneuver["time"]) %></span>
+                                <span>{format_distance(maneuver["length"])}</span>
+                                <span>{format_duration(maneuver["time"])}</span>
                               </div>
                             </div>
                           <% end %>
@@ -220,8 +265,18 @@
             <!-- No Results -->
             <div class="bg-white rounded-lg shadow-md p-6 text-center">
               <div class="text-gray-400 mb-4">
-                <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                <svg
+                  class="mx-auto h-12 w-12"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                  />
                 </svg>
               </div>
               <h3 class="text-lg font-medium text-gray-900 mb-2">
@@ -236,5 +291,4 @@
       </div>
     </div>
   </div>
-
 </Layouts.app>

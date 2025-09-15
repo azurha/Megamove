@@ -28,7 +28,7 @@ defmodule Megamove.ValhallaServiceTest do
     test "gère les erreurs de réseau" do
       # Test avec un serveur inexistant
       original_config = Application.get_env(:megamove, :valhalla)
-      Application.put_env(:megamove, :valhalla, [base_url: "http://localhost:9999"])
+      Application.put_env(:megamove, :valhalla, base_url: "http://localhost:9999")
 
       locations = [{48.8566, 2.3522}, {48.8606, 2.3376}]
 

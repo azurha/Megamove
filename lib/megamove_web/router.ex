@@ -68,6 +68,7 @@ defmodule MegamoveWeb.Router do
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
       live "/valhalla-demo", ValhallaDemoLive, :index
+      live "/address-demo", AddressDemoLive, :index
     end
 
     post "/users/log-in", UserSessionController, :create

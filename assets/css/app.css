@@ -103,3 +103,7 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+/* Leaflet CSS */
+@import "leaflet/dist/leaflet.css";
+/* Override: prevent Leaflet CSS from fetching marker images relative to CSS path */
+.leaflet-default-icon-path { background-image: none !important; }
