@@ -33,12 +33,13 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
     <div class="relative" id={@id}>
       <.form for={%{}} as={:ac} id={@id <> "-form"} phx-change="search" phx-target={@myself}>
         <.input
-          type="text"
+          type="textarea"
           name="q"
           value={@query}
           placeholder={@placeholder || "Saisissez une adresse"}
           phx-debounce="300"
-          class="w-full"
+          rows="2"
+          class="w-full resize-none leading-tight bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </.form>
 
@@ -62,7 +63,6 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
             phx-target={@myself}
           >
             <div class="text-sm text-gray-900 truncate">{s.display_name}</div>
-            <div class="text-xs text-gray-500">{Float.round(s.lat, 6)}, {Float.round(s.lon, 6)}</div>
           </li>
         </ul>
         <div :if={!@loading and @suggestions == [] and @query != ""} class="p-3 text-sm text-gray-500">
@@ -76,6 +76,11 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
   @impl true
   def handle_event("search", params, socket) do
     query = get_in(params, ["ac", "q"]) || Map.get(params, "q", "")
+    # Nettoie la requête pour Nominatim (les retours à la ligne sont remplacés par des espaces)
+    sanitized_query =
+      query
+      |> String.replace("\n", " ")
+      |> String.replace(~r/\s+/, " ")
 
     if String.trim(query) == "" do
       {:noreply,
@@ -87,7 +92,7 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
        |> assign(:error, nil)}
     else
       # Exécute la recherche immédiatement (debounced côté client)
-      case NominatimService.search(query, limit: 8, language: "fr") do
+      case NominatimService.search(sanitized_query, limit: 8, language: "fr") do
         {:ok, suggestions} ->
           {:noreply,
            socket
@@ -114,12 +119,12 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
     latf = to_float(lat)
     lonf = to_float(lon)
 
-    # Notifie directement le parent (LiveView)
-    send(self(), {:address_selected, {label, latf, lonf}})
+    # Notifie directement le parent (LiveView) en précisant la source (id du composant)
+    send(self(), {:address_selected, %{id: socket.assigns.id, label: label, lat: latf, lon: lonf}})
 
     {:noreply,
      socket
-     |> assign(:query, label)
+     |> assign(:query, format_display(label))
      |> assign(:suggestions, [])
      |> assign(:open, false)
      |> assign(:loading, false)
@@ -142,4 +147,30 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
 
   defp format_error({:http_error, status, _body}), do: "Erreur HTTP #{status}"
   defp format_error(other), do: "Erreur: #{inspect(other)}"
+
+  defp format_display(label) when is_binary(label) do
+    parts =
+      label
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+
+    line1 = Enum.at(parts, 0, label)
+
+    postal_index = Enum.find_index(parts, fn p -> Regex.match?(~r/^\d{4,5}$/u, p) end)
+
+    line2 =
+      if postal_index do
+        postal = Enum.at(parts, postal_index)
+        city = Enum.at(parts, postal_index - 1) || Enum.at(parts, postal_index + 1)
+        if city, do: postal <> " " <> city, else: postal
+      else
+        parts
+        |> Enum.drop(1)
+        |> Enum.take(2)
+        |> Enum.join(", ")
+      end
+
+    line1 <> "\n" <> line2
+  end
 end

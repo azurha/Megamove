@@ -25,9 +25,9 @@ defmodule Megamove.ValhallaService do
       {:ok, %{trip: %{legs: [...]}}}
   """
   @spec route(list({float(), float()}), keyword()) ::
-          {:ok, map()} |
-          {:ok, map(), %{url: String.t(), raw: String.t()}} |
-          {:error, term()}
+          {:ok, map()}
+          | {:ok, map(), %{url: String.t(), raw: String.t()}}
+          | {:error, term()}
   def route(locations, opts \\ []) do
     costing = Keyword.get(opts, :costing, "auto")
 

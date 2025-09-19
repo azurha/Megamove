@@ -144,11 +144,24 @@
               module={MegamoveWeb.MapComponent}
               id="valhalla-map"
               markers={[
-                %{lat: elem(Enum.at(@locations, 0), 0), lon: elem(Enum.at(@locations, 0), 1), label: "Départ"},
-                %{lat: elem(Enum.at(@locations, 1), 0), lon: elem(Enum.at(@locations, 1), 1), label: "Arrivée"}
+                %{
+                  lat: elem(Enum.at(@locations, 0), 0),
+                  lon: elem(Enum.at(@locations, 0), 1),
+                  label: "Départ"
+                },
+                %{
+                  lat: elem(Enum.at(@locations, 1), 0),
+                  lon: elem(Enum.at(@locations, 1), 1),
+                  label: "Arrivée"
+                }
               ]}
               polylines={[
-                %{shape: @route_result && @route_result["trip"] && @route_result["trip"]["legs"] && (@route_result["trip"]["legs"] |> Enum.at(0) |> then(&(&1 && &1["shape"]))) || nil}
+                %{
+                  shape:
+                    (@route_result && @route_result["trip"] && @route_result["trip"]["legs"] &&
+                       @route_result["trip"]["legs"] |> Enum.at(0) |> then(&(&1 && &1["shape"]))) ||
+                      nil
+                }
               ]}
             />
           </div>
