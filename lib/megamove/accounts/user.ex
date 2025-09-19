@@ -9,6 +9,9 @@ defmodule Megamove.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
+    # Relation avec l'organisation
+    belongs_to :organization, Megamove.Organizations.Organization
+
     timestamps(type: :utc_datetime)
   end
 
