@@ -10,7 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Megamove.{Organizations, Places}
+alias Megamove.{Organizations, Places, Memberships, Carriers}
 
 # Créer des organisations de test
 IO.puts("🌱 Création des organisations de test...")
@@ -135,8 +135,52 @@ IO.puts("🌱 Création des lieux de test...")
 
 IO.puts("✅ Lieux créés avec succès")
 
+# Créer des adhésions pour les utilisateurs existants
+IO.puts("🌱 Création des adhésions...")
+
+# Récupérer l'utilisateur par défaut
+default_user = Megamove.Accounts.get_user_by_email("test@example.com") || 
+               Megamove.Accounts.list_users() |> List.first()
+
+if default_user do
+  # Adhésion à l'organisation par défaut
+  {:ok, _membership1} = Memberships.add_user_to_organization(1, default_user.id, :owner)
+  
+  # Adhésions aux nouvelles organisations
+  {:ok, _membership2} = Memberships.add_user_to_organization(shipper_org.id, default_user.id, :admin)
+  {:ok, _membership3} = Memberships.add_user_to_organization(carrier_org.id, default_user.id, :member)
+  {:ok, _membership4} = Memberships.add_user_to_organization(broker_org.id, default_user.id, :viewer)
+  
+  IO.puts("✅ Adhésions créées avec succès")
+end
+
+# Créer des transporteurs
+IO.puts("🌱 Création des transporteurs...")
+
+{:ok, _carrier1} = Carriers.create_carrier(%{
+  org_id: carrier_org.id,
+  legal_name: "Transport Express SARL",
+  vat_number: "FR12345678901",
+  contact_email: "contact@transport-express.fr",
+  contact_phone: "+33 4 12 34 56 78",
+  status: :active
+})
+
+{:ok, _carrier2} = Carriers.create_carrier(%{
+  org_id: carrier_org.id,
+  legal_name: "Fret & Co",
+  vat_number: "FR98765432109",
+  contact_email: "info@fret-co.fr",
+  contact_phone: "+33 4 91 23 45 67",
+  status: :active
+})
+
+IO.puts("✅ Transporteurs créés avec succès")
+
 IO.puts("🎉 Seeds terminés avec succès !")
 IO.puts("📊 Résumé :")
-IO.puts("  - 3 organisations créées")
+IO.puts("  - 4 organisations créées")
 IO.puts("  - 5 lieux créés")
-IO.puts("  - Base de données prête pour les tests")
+IO.puts("  - 4 adhésions créées")
+IO.puts("  - 2 transporteurs créés")
+IO.puts("  - Base de données complète prête pour les tests")
