@@ -9,7 +9,7 @@ defmodule Megamove.Memberships.Membership do
   @primary_key {:id, :id, autogenerate: true}
   @foreign_key_type :id
 
-  @org_roles ~w[owner admin member viewer]a
+  @org_roles ~w[owner admin dispatcher driver requester viewer]a
 
   schema "memberships" do
     field :org_role, Ecto.Enum, values: @org_roles

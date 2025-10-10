@@ -46,7 +46,7 @@ defmodule Megamove.Organizations do
   """
   def create_organization(attrs \\ %{}) do
     attrs = maybe_generate_slug(attrs)
-    
+
     %Organization{}
     |> Organization.changeset(attrs)
     |> Repo.insert()
@@ -57,7 +57,7 @@ defmodule Megamove.Organizations do
   """
   def update_organization(%Organization{} = organization, attrs) do
     attrs = maybe_generate_slug(attrs, organization)
-    
+
     organization
     |> Organization.changeset(attrs)
     |> Repo.update()
@@ -89,7 +89,7 @@ defmodule Megamove.Organizations do
   """
   def search_organizations(query) when is_binary(query) do
     search_term = "%#{query}%"
-    
+
     from(o in Organization,
       where: ilike(o.name, ^search_term) or ilike(o.email, ^search_term),
       order_by: [asc: o.name]
@@ -100,7 +100,8 @@ defmodule Megamove.Organizations do
   @doc """
   Filtre les organisations par type.
   """
-  def list_organizations_by_type(org_type) when org_type in ~w[shipper carrier broker platform]a do
+  def list_organizations_by_type(org_type)
+      when org_type in ~w[shipper carrier broker platform]a do
     from(o in Organization, where: o.org_type == ^org_type and o.is_active == true)
     |> Repo.all()
   end
@@ -109,14 +110,17 @@ defmodule Megamove.Organizations do
 
   defp maybe_generate_slug(attrs, organization \\ nil) do
     case Map.get(attrs, :slug) do
-      nil -> 
+      nil ->
         name = Map.get(attrs, :name) || (organization && organization.name)
+
         if name do
           Map.put(attrs, :slug, Organization.generate_slug(name))
         else
           attrs
         end
-      _ -> attrs
+
+      _ ->
+        attrs
     end
   end
 end

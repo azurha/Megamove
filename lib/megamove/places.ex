@@ -33,7 +33,7 @@ defmodule Megamove.Places do
   """
   def create_place(attrs \\ %{}) do
     attrs = maybe_generate_geohash(attrs)
-    
+
     %Place{}
     |> Place.changeset(attrs)
     |> Repo.insert()
@@ -44,7 +44,7 @@ defmodule Megamove.Places do
   """
   def update_place(%Place{} = place, attrs) do
     attrs = maybe_generate_geohash(attrs)
-    
+
     place
     |> Place.changeset(attrs)
     |> Repo.update()
@@ -69,10 +69,11 @@ defmodule Megamove.Places do
   """
   def search_places(org_id, query) when is_binary(query) do
     search_term = "%#{query}%"
-    
+
     from(p in Place,
-      where: p.organization_id == ^org_id and 
-             (ilike(p.name, ^search_term) or ilike(p.city, ^search_term)),
+      where:
+        p.organization_id == ^org_id and
+          (ilike(p.name, ^search_term) or ilike(p.city, ^search_term)),
       order_by: [asc: p.name]
     )
     |> Repo.all()
@@ -84,13 +85,15 @@ defmodule Megamove.Places do
   def find_nearby_places(org_id, lat, lng, radius_km \\ 50) do
     # Pour l'instant, on utilise une recherche simple par bounding box
     # En production, on pourrait utiliser PostGIS ou une recherche par geohash
-    lat_delta = radius_km / 111.0  # Approximation: 1 degré ≈ 111 km
+    # Approximation: 1 degré ≈ 111 km
+    lat_delta = radius_km / 111.0
     lng_delta = radius_km / (111.0 * :math.cos(lat * :math.pi() / 180))
-    
+
     from(p in Place,
-      where: p.organization_id == ^org_id and
-             p.lat >= ^(lat - lat_delta) and p.lat <= ^(lat + lat_delta) and
-             p.lng >= ^(lng - lng_delta) and p.lng <= ^(lng + lng_delta),
+      where:
+        p.organization_id == ^org_id and
+          p.lat >= ^(lat - lat_delta) and p.lat <= ^(lat + lat_delta) and
+          p.lng >= ^(lng - lng_delta) and p.lng <= ^(lng + lng_delta),
       order_by: [asc: p.name]
     )
     |> Repo.all()
@@ -121,7 +124,9 @@ defmodule Megamove.Places do
       {lat, lng} when is_number(lat) and is_number(lng) ->
         geohash = Place.generate_geohash(lat, lng)
         Map.put(attrs, :geohash, geohash)
-      _ -> attrs
+
+      _ ->
+        attrs
     end
   end
 end

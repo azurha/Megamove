@@ -19,7 +19,7 @@ defmodule Megamove.Memberships do
   Retourne la liste des organisations d'un utilisateur.
   """
   def list_user_organizations(user_id) do
-    from(m in Membership, 
+    from(m in Membership,
       where: m.user_id == ^user_id,
       join: o in assoc(m, :organization),
       preload: [organization: o]
@@ -75,7 +75,7 @@ defmodule Megamove.Memberships do
   @doc """
   Ajoute un utilisateur à une organisation.
   """
-  def add_user_to_organization(org_id, user_id, role \\ :member) do
+  def add_user_to_organization(org_id, user_id, role \\ :requester) do
     create_membership(%{
       org_id: org_id,
       user_id: user_id,

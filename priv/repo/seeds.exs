@@ -17,58 +17,62 @@ IO.puts("🌱 Création des organisations de test...")
 
 # Vérifier si les organisations existent déjà
 existing_orgs = Organizations.list_organizations()
+
 if length(existing_orgs) > 1 do
   IO.puts("⚠️  Des organisations existent déjà, on passe les seeds...")
   System.halt(0)
 end
 
 # Organisation expéditeur
-{:ok, shipper_org} = Organizations.create_organization(%{
-  name: "Transport Express SARL",
-  slug: "transport-express",
-  org_type: :shipper,
-  address: "123 Rue de la Logistique",
-  city: "Lyon",
-  postal_code: "69000",
-  country: "FR",
-  phone: "+33 4 12 34 56 78",
-  email: "contact@transport-express.fr",
-  website: "https://transport-express.fr",
-  vat_number: "FR12345678901",
-  siret: "12345678901234"
-})
+{:ok, shipper_org} =
+  Organizations.create_organization(%{
+    name: "Transport Express SARL",
+    slug: "transport-express",
+    org_type: :shipper,
+    address: "123 Rue de la Logistique",
+    city: "Lyon",
+    postal_code: "69000",
+    country: "FR",
+    phone: "+33 4 12 34 56 78",
+    email: "contact@transport-express.fr",
+    website: "https://transport-express.fr",
+    vat_number: "FR12345678901",
+    siret: "12345678901234"
+  })
 
 # Organisation transporteur
-{:ok, carrier_org} = Organizations.create_organization(%{
-  name: "Fret & Co",
-  slug: "fret-co",
-  org_type: :carrier,
-  address: "456 Avenue du Transport",
-  city: "Marseille",
-  postal_code: "13000",
-  country: "FR",
-  phone: "+33 4 91 23 45 67",
-  email: "info@fret-co.fr",
-  website: "https://fret-co.fr",
-  vat_number: "FR98765432109",
-  siret: "98765432109876"
-})
+{:ok, carrier_org} =
+  Organizations.create_organization(%{
+    name: "Fret & Co",
+    slug: "fret-co",
+    org_type: :carrier,
+    address: "456 Avenue du Transport",
+    city: "Marseille",
+    postal_code: "13000",
+    country: "FR",
+    phone: "+33 4 91 23 45 67",
+    email: "info@fret-co.fr",
+    website: "https://fret-co.fr",
+    vat_number: "FR98765432109",
+    siret: "98765432109876"
+  })
 
 # Organisation courtier
-{:ok, broker_org} = Organizations.create_organization(%{
-  name: "Logistics Broker Pro",
-  slug: "logistics-broker-pro",
-  org_type: :broker,
-  address: "789 Boulevard de l'Intermodalité",
-  city: "Paris",
-  postal_code: "75000",
-  country: "FR",
-  phone: "+33 1 23 45 67 89",
-  email: "contact@logistics-broker-pro.fr",
-  website: "https://logistics-broker-pro.fr",
-  vat_number: "FR11223344556",
-  siret: "11223344556677"
-})
+{:ok, broker_org} =
+  Organizations.create_organization(%{
+    name: "Logistics Broker Pro",
+    slug: "logistics-broker-pro",
+    org_type: :broker,
+    address: "789 Boulevard de l'Intermodalité",
+    city: "Paris",
+    postal_code: "75000",
+    country: "FR",
+    phone: "+33 1 23 45 67 89",
+    email: "contact@logistics-broker-pro.fr",
+    website: "https://logistics-broker-pro.fr",
+    vat_number: "FR11223344556",
+    siret: "11223344556677"
+  })
 
 IO.puts("✅ Organisations créées avec succès")
 
@@ -76,62 +80,67 @@ IO.puts("✅ Organisations créées avec succès")
 IO.puts("🌱 Création des lieux de test...")
 
 # Lieux pour Transport Express
-{:ok, _place1} = Places.create_place(%{
-  organization_id: shipper_org.id,
-  name: "Entrepôt Principal Lyon",
-  address: "123 Rue de la Logistique, 69000 Lyon",
-  city: "Lyon",
-  postal_code: "69000",
-  country: "FR",
-  lat: 45.764043,
-  lng: 4.835659
-})
+{:ok, _place1} =
+  Places.create_place(%{
+    organization_id: shipper_org.id,
+    name: "Entrepôt Principal Lyon",
+    address: "123 Rue de la Logistique, 69000 Lyon",
+    city: "Lyon",
+    postal_code: "69000",
+    country: "FR",
+    lat: 45.764043,
+    lng: 4.835659
+  })
 
-{:ok, _place2} = Places.create_place(%{
-  organization_id: shipper_org.id,
-  name: "Dépôt Secondaire Villeurbanne",
-  address: "456 Avenue de la Distribution, 69100 Villeurbanne",
-  city: "Villeurbanne",
-  postal_code: "69100",
-  country: "FR",
-  lat: 45.7666,
-  lng: 4.8803
-})
+{:ok, _place2} =
+  Places.create_place(%{
+    organization_id: shipper_org.id,
+    name: "Dépôt Secondaire Villeurbanne",
+    address: "456 Avenue de la Distribution, 69100 Villeurbanne",
+    city: "Villeurbanne",
+    postal_code: "69100",
+    country: "FR",
+    lat: 45.7666,
+    lng: 4.8803
+  })
 
 # Lieux pour Fret & Co
-{:ok, _place3} = Places.create_place(%{
-  organization_id: carrier_org.id,
-  name: "Terminal Portuaire Marseille",
-  address: "789 Quai de la Joliette, 13002 Marseille",
-  city: "Marseille",
-  postal_code: "13002",
-  country: "FR",
-  lat: 43.2965,
-  lng: 5.3698
-})
+{:ok, _place3} =
+  Places.create_place(%{
+    organization_id: carrier_org.id,
+    name: "Terminal Portuaire Marseille",
+    address: "789 Quai de la Joliette, 13002 Marseille",
+    city: "Marseille",
+    postal_code: "13002",
+    country: "FR",
+    lat: 43.2965,
+    lng: 5.3698
+  })
 
-{:ok, _place4} = Places.create_place(%{
-  organization_id: carrier_org.id,
-  name: "Centre de Tri Aix-en-Provence",
-  address: "321 Route de Nice, 13100 Aix-en-Provence",
-  city: "Aix-en-Provence",
-  postal_code: "13100",
-  country: "FR",
-  lat: 43.5263,
-  lng: 5.4454
-})
+{:ok, _place4} =
+  Places.create_place(%{
+    organization_id: carrier_org.id,
+    name: "Centre de Tri Aix-en-Provence",
+    address: "321 Route de Nice, 13100 Aix-en-Provence",
+    city: "Aix-en-Provence",
+    postal_code: "13100",
+    country: "FR",
+    lat: 43.5263,
+    lng: 5.4454
+  })
 
 # Lieux pour Logistics Broker Pro
-{:ok, _place5} = Places.create_place(%{
-  organization_id: broker_org.id,
-  name: "Bureau Principal Paris",
-  address: "789 Boulevard de l'Intermodalité, 75000 Paris",
-  city: "Paris",
-  postal_code: "75000",
-  country: "FR",
-  lat: 48.8566,
-  lng: 2.3522
-})
+{:ok, _place5} =
+  Places.create_place(%{
+    organization_id: broker_org.id,
+    name: "Bureau Principal Paris",
+    address: "789 Boulevard de l'Intermodalité, 75000 Paris",
+    city: "Paris",
+    postal_code: "75000",
+    country: "FR",
+    lat: 48.8566,
+    lng: 2.3522
+  })
 
 IO.puts("✅ Lieux créés avec succès")
 
@@ -139,41 +148,49 @@ IO.puts("✅ Lieux créés avec succès")
 IO.puts("🌱 Création des adhésions...")
 
 # Récupérer l'utilisateur par défaut
-default_user = Megamove.Accounts.get_user_by_email("test@example.com") || 
-               Megamove.Accounts.list_users() |> List.first()
+default_user =
+  Megamove.Accounts.get_user_by_email("test@example.com") ||
+    Megamove.Accounts.list_users() |> List.first()
 
 if default_user do
   # Adhésion à l'organisation par défaut
   {:ok, _membership1} = Memberships.add_user_to_organization(1, default_user.id, :owner)
-  
+
   # Adhésions aux nouvelles organisations
-  {:ok, _membership2} = Memberships.add_user_to_organization(shipper_org.id, default_user.id, :admin)
-  {:ok, _membership3} = Memberships.add_user_to_organization(carrier_org.id, default_user.id, :member)
-  {:ok, _membership4} = Memberships.add_user_to_organization(broker_org.id, default_user.id, :viewer)
-  
+  {:ok, _membership2} =
+    Memberships.add_user_to_organization(shipper_org.id, default_user.id, :admin)
+
+  {:ok, _membership3} =
+    Memberships.add_user_to_organization(carrier_org.id, default_user.id, :dispatcher)
+
+  {:ok, _membership4} =
+    Memberships.add_user_to_organization(broker_org.id, default_user.id, :viewer)
+
   IO.puts("✅ Adhésions créées avec succès")
 end
 
 # Créer des transporteurs
 IO.puts("🌱 Création des transporteurs...")
 
-{:ok, _carrier1} = Carriers.create_carrier(%{
-  org_id: carrier_org.id,
-  legal_name: "Transport Express SARL",
-  vat_number: "FR12345678901",
-  contact_email: "contact@transport-express.fr",
-  contact_phone: "+33 4 12 34 56 78",
-  status: :active
-})
+{:ok, _carrier1} =
+  Carriers.create_carrier(%{
+    org_id: carrier_org.id,
+    legal_name: "Transport Express SARL",
+    vat_number: "FR12345678901",
+    contact_email: "contact@transport-express.fr",
+    contact_phone: "+33 4 12 34 56 78",
+    status: :active
+  })
 
-{:ok, _carrier2} = Carriers.create_carrier(%{
-  org_id: carrier_org.id,
-  legal_name: "Fret & Co",
-  vat_number: "FR98765432109",
-  contact_email: "info@fret-co.fr",
-  contact_phone: "+33 4 91 23 45 67",
-  status: :active
-})
+{:ok, _carrier2} =
+  Carriers.create_carrier(%{
+    org_id: carrier_org.id,
+    legal_name: "Fret & Co",
+    vat_number: "FR98765432109",
+    contact_email: "info@fret-co.fr",
+    contact_phone: "+33 4 91 23 45 67",
+    status: :active
+  })
 
 IO.puts("✅ Transporteurs créés avec succès")
 

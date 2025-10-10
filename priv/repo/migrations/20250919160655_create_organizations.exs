@@ -31,7 +31,8 @@ defmodule Megamove.Repo.Migrations.CreateOrganizations do
     create index(:organizations, [:country])
 
     # Contrainte CHECK pour org_type
-    create constraint(:organizations, :org_type_check, 
-      check: "org_type IN ('shipper', 'carrier', 'broker', 'platform')")
+    create constraint(:organizations, :org_type_check,
+             check: "org_type IN ('shipper', 'carrier', 'broker', 'platform')"
+           )
   end
 end

@@ -24,7 +24,8 @@ defmodule Megamove.Repo.Migrations.CreateTransportRequestStops do
     create index(:transport_request_stops, [:org_id, :stop_type])
 
     # Contrainte CHECK pour stop_type
-    create constraint(:transport_request_stops, :stop_type_check, 
-      check: "stop_type IN ('pickup', 'dropoff', 'waypoint')")
+    create constraint(:transport_request_stops, :stop_type_check,
+             check: "stop_type IN ('pickup', 'dropoff', 'waypoint')"
+           )
   end
 end

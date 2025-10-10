@@ -21,7 +21,8 @@ defmodule Megamove.Repo.Migrations.CreateAssignments do
     create index(:assignments, [:driver_user_id])
 
     # Contrainte CHECK pour status
-    create constraint(:assignments, :status_check, 
-      check: "status IN ('planned', 'en_route', 'arrived', 'completed', 'cancelled')")
+    create constraint(:assignments, :status_check,
+             check: "status IN ('planned', 'en_route', 'arrived', 'completed', 'cancelled')"
+           )
   end
 end

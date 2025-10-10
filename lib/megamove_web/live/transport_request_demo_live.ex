@@ -54,7 +54,10 @@ defmodule MegamoveWeb.TransportRequestDemoLive do
       end
 
     if payload != %{} do
-      send_update(TransportRequestComponent, Keyword.merge([id: "transport-request-demo"], Map.to_list(payload)))
+      send_update(
+        TransportRequestComponent,
+        Keyword.merge([id: "transport-request-demo"], Map.to_list(payload))
+      )
     end
 
     {:noreply, socket}

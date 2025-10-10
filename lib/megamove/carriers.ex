@@ -73,10 +73,11 @@ defmodule Megamove.Carriers do
   """
   def search_carriers(org_id, query) when is_binary(query) do
     search_term = "%#{query}%"
-    
+
     from(c in Carrier,
-      where: c.org_id == ^org_id and 
-             (ilike(c.legal_name, ^search_term) or ilike(c.vat_number, ^search_term)),
+      where:
+        c.org_id == ^org_id and
+          (ilike(c.legal_name, ^search_term) or ilike(c.vat_number, ^search_term)),
       order_by: [asc: c.legal_name]
     )
     |> Repo.all()
@@ -85,7 +86,8 @@ defmodule Megamove.Carriers do
   @doc """
   Change le statut d'un transporteur.
   """
-  def change_carrier_status(%Carrier{} = carrier, new_status) when new_status in [:active, :suspended, :pending] do
+  def change_carrier_status(%Carrier{} = carrier, new_status)
+      when new_status in [:active, :suspended, :pending] do
     update_carrier(carrier, %{status: new_status})
   end
 

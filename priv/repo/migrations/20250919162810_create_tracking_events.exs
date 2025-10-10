@@ -23,7 +23,9 @@ defmodule Megamove.Repo.Migrations.CreateTrackingEvents do
     create index(:tracking_events, [:org_id, :lat, :lng])
 
     # Contrainte CHECK pour event_type
-    create constraint(:tracking_events, :event_type_check, 
-      check: "event_type IN ('departed', 'arrived', 'loaded', 'unloaded', 'delivered', 'exception', 'delay')")
+    create constraint(:tracking_events, :event_type_check,
+             check:
+               "event_type IN ('departed', 'arrived', 'loaded', 'unloaded', 'delivered', 'exception', 'delay')"
+           )
   end
 end

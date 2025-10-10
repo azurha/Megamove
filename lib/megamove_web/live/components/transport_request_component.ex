@@ -33,6 +33,7 @@ defmodule MegamoveWeb.TransportRequestComponent do
       cond do
         Map.has_key?(assigns, :departure) ->
           %{label: label, lat: lat, lon: lon} = assigns.departure
+
           socket
           |> assign(:departure_address, %{label: label, lat: lat, lon: lon})
           |> maybe_autoroute()
@@ -40,6 +41,7 @@ defmodule MegamoveWeb.TransportRequestComponent do
 
         Map.has_key?(assigns, :arrival) ->
           %{label: label, lat: lat, lon: lon} = assigns.arrival
+
           socket
           |> assign(:arrival_address, %{label: label, lat: lat, lon: lon})
           |> maybe_autoroute()
@@ -60,11 +62,11 @@ defmodule MegamoveWeb.TransportRequestComponent do
         <!-- Section des adresses -->
         <div class="flex-1 space-y-4">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Demande de Transport</h3>
-
-          <!-- Adresse de départ -->
+          
+    <!-- Adresse de départ -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Adresse de départ
+            <label class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+              <.icon name="hero-map-pin" class="h-5 w-5 text-blue-500" /> Adresse de départ
             </label>
             <.live_component
               module={AddressAutocompleteComponent}
@@ -72,11 +74,11 @@ defmodule MegamoveWeb.TransportRequestComponent do
               placeholder="12 rue de l'Aubépine 32458 Flétri-le-Pinçon"
             />
           </div>
-
-          <!-- Adresse d'arrivée -->
+          
+    <!-- Adresse d'arrivée -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Adresse d'arrivée
+            <label class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+              <.icon name="hero-map-pin" class="h-5 w-5 text-emerald-500" /> Adresse d'arrivée
             </label>
             <.live_component
               module={AddressAutocompleteComponent}
@@ -84,8 +86,8 @@ defmodule MegamoveWeb.TransportRequestComponent do
               placeholder="2 Avenue des Marronniers 21000 Dijon"
             />
           </div>
-
-          <!-- Checkbox poids lourd -->
+          
+    <!-- Checkbox poids lourd -->
           <div class="flex items-center">
             <input
               type="checkbox"
@@ -99,14 +101,14 @@ defmodule MegamoveWeb.TransportRequestComponent do
               Transport en poids lourd
             </label>
           </div>
-
-          <!-- Erreurs -->
+          
+    <!-- Erreurs -->
           <div :if={@error} class="pt-2 text-sm text-red-600">{@error}</div>
-
-          <!-- Les libellés complets sont désormais affichés directement dans les champs ci-dessus -->
+          
+    <!-- Les libellés complets sont désormais affichés directement dans les champs ci-dessus -->
         </div>
-
-        <!-- Section carte -->
+        
+    <!-- Section carte -->
         <div class="flex-1">
           <div class="h-full">
             <.live_component
@@ -143,10 +145,12 @@ defmodule MegamoveWeb.TransportRequestComponent do
             {:noreply, socket |> apply_shape(shape)}
 
           {:error, {:http_error, status, _body, _url}} ->
-            {:noreply, assign(socket, :error, "Erreur HTTP #{status} lors du recalcul de l'itinéraire")}
+            {:noreply,
+             assign(socket, :error, "Erreur HTTP #{status} lors du recalcul de l'itinéraire")}
 
           {:error, reason} ->
-            {:noreply, assign(socket, :error, "Erreur lors du recalcul de l'itinéraire: #{inspect(reason)}")}
+            {:noreply,
+             assign(socket, :error, "Erreur lors du recalcul de l'itinéraire: #{inspect(reason)}")}
         end
 
       _ ->
@@ -164,22 +168,30 @@ defmodule MegamoveWeb.TransportRequestComponent do
 
     markers =
       if socket.assigns.departure_address do
-        [%{
-          lat: socket.assigns.departure_address.lat,
-          lon: socket.assigns.departure_address.lon,
-          label: "Départ: #{socket.assigns.departure_address.label}"
-        } | markers]
+        [
+          %{
+            lat: socket.assigns.departure_address.lat,
+            lon: socket.assigns.departure_address.lon,
+            label: "Départ: #{socket.assigns.departure_address.label}",
+            color: "#3b82f6"
+          }
+          | markers
+        ]
       else
         markers
       end
 
     markers =
       if socket.assigns.arrival_address do
-        [%{
-          lat: socket.assigns.arrival_address.lat,
-          lon: socket.assigns.arrival_address.lon,
-          label: "Arrivée: #{socket.assigns.arrival_address.label}"
-        } | markers]
+        [
+          %{
+            lat: socket.assigns.arrival_address.lat,
+            lon: socket.assigns.arrival_address.lon,
+            label: "Arrivée: #{socket.assigns.arrival_address.label}",
+            color: "#10b981"
+          }
+          | markers
+        ]
       else
         markers
       end
@@ -192,14 +204,16 @@ defmodule MegamoveWeb.TransportRequestComponent do
           socket.assigns.polylines
 
         socket.assigns.departure_address && socket.assigns.arrival_address ->
-          [%{
-            shape: [
-              [socket.assigns.departure_address.lat, socket.assigns.departure_address.lon],
-              [socket.assigns.arrival_address.lat, socket.assigns.arrival_address.lon]
-            ],
-            color: if(socket.assigns.heavy_vehicle, do: "#ef4444", else: "#3b82f6"),
-            weight: if(socket.assigns.heavy_vehicle, do: 4, else: 2)
-          }]
+          [
+            %{
+              shape: [
+                [socket.assigns.departure_address.lat, socket.assigns.departure_address.lon],
+                [socket.assigns.arrival_address.lat, socket.assigns.arrival_address.lon]
+              ],
+              color: if(socket.assigns.heavy_vehicle, do: "#ef4444", else: "#3b82f6"),
+              weight: if(socket.assigns.heavy_vehicle, do: 4, else: 2)
+            }
+          ]
 
         true ->
           []

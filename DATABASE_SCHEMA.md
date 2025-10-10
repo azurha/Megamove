@@ -84,11 +84,22 @@ Ce document décrit l'architecture complète de la base de données pour la plat
 
 **Contraintes :**
 - `memberships_org_id_user_id_index` UNIQUE sur `(org_id, user_id)`
-- `org_role` CHECK IN ('owner', 'admin', 'member', 'viewer')
+- `org_role` CHECK IN ('owner', 'admin', 'dispatcher', 'driver', 'requester', 'viewer')
 
 **Index :**
 - `memberships_org_id_index` sur `org_id`
 - `memberships_user_id_index` sur `user_id`
+
+**Rôles et permissions :**
+
+| Rôle | Description | Permissions |
+|------|-------------|-------------|
+| `owner` | Propriétaire de l'organisation | Contrôle total : gestion membres, paramètres, facturation, toutes opérations |
+| `admin` | Administrateur | Gestion membres et paramètres, toutes opérations opérationnelles |
+| `dispatcher` | Dispatcheur/Société de transport | Voir demandes org, créer/éditer devis, accepter/refuser, assigner missions |
+| `driver` | Conducteur/Transporteur | Lire missions assignées, mettre à jour statuts, preuve de livraison |
+| `requester` | Demandeur/Visiteur | Créer demandes, lire ses demandes/devis, accepter/refuser devis |
+| `viewer` | Lecture seule | Lecture globale de l'organisation, pas d'écriture |
 
 ### carriers
 **Table des transporteurs (optionnel - peut être intégré dans users)**

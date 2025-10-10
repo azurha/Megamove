@@ -20,7 +20,8 @@ defmodule Megamove.Repo.Migrations.CreateInvoices do
     create index(:invoices, [:booking_id])
 
     # Contrainte CHECK pour status
-    create constraint(:invoices, :status_check, 
-      check: "status IN ('draft', 'issued', 'paid', 'void')")
+    create constraint(:invoices, :status_check,
+             check: "status IN ('draft', 'issued', 'paid', 'void')"
+           )
   end
 end

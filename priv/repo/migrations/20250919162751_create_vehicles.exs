@@ -23,7 +23,8 @@ defmodule Megamove.Repo.Migrations.CreateVehicles do
     create index(:vehicles, [:org_id, :vehicle_type])
 
     # Contrainte CHECK pour vehicle_type
-    create constraint(:vehicles, :vehicle_type_check, 
-      check: "vehicle_type IN ('van', 'rigid', 'tractor', 'trailer', 'bike', 'other')")
+    create constraint(:vehicles, :vehicle_type_check,
+             check: "vehicle_type IN ('van', 'rigid', 'tractor', 'trailer', 'bike', 'other')"
+           )
   end
 end

@@ -107,3 +107,35 @@
 @import "leaflet/dist/leaflet.css";
 /* Override: prevent Leaflet CSS from fetching marker images relative to CSS path */
 .leaflet-default-icon-path { background-image: none !important; }
+
+.mm-map-badge-marker {
+  background: transparent;
+  border: none;
+}
+
+.mm-map-badge-marker .mm-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: var(--mm-pin-color, #1d4ed8);
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 20px rgba(30, 64, 175, 0.25);
+  transform: translateY(-8px);
+  position: relative;
+}
+
+.mm-map-badge-marker .mm-pin::after {
+  content: "";
+  position: absolute;
+  bottom: -0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0.4rem;
+  height: 0.8rem;
+  border-radius: 9999px;
+  background: var(--mm-pin-color, #1d4ed8);
+  filter: brightness(0.9);
+}

@@ -20,7 +20,8 @@ defmodule Megamove.Repo.Migrations.CreateCarriers do
     create index(:carriers, [:status])
 
     # Contrainte CHECK pour status
-    create constraint(:carriers, :status_check, 
-      check: "status IN ('active', 'suspended', 'pending')")
+    create constraint(:carriers, :status_check,
+             check: "status IN ('active', 'suspended', 'pending')"
+           )
   end
 end

@@ -30,43 +30,103 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="relative" id={@id}>
-      <.form for={%{}} as={:ac} id={@id <> "-form"} phx-change="search" phx-target={@myself}>
-        <.input
-          type="textarea"
-          name="q"
-          value={@query}
-          placeholder={@placeholder || "Saisissez une adresse"}
-          phx-debounce="300"
-          rows="2"
-          class="w-full resize-none leading-tight bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
-      </.form>
+    <div class="relative" id={@id} phx-hook="AddressAutocomplete">
+      <div class="group relative">
+        <div class="pointer-events-none absolute -inset-[1.5px] rounded-2xl bg-gradient-to-r from-blue-100 via-teal-100 to-blue-100 opacity-0 transition-all duration-300 group-focus-within:opacity-100 group-hover:opacity-70">
+        </div>
+        <div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 group-hover:shadow-md group-focus-within:border-blue-400 group-focus-within:shadow-xl">
+          <div class="flex flex-col gap-3 p-4 sm:p-5">
+            <.form
+              for={%{}}
+              as={:ac}
+              id={@id <> "-form"}
+              phx-change="search"
+              phx-target={@myself}
+              class="rounded-2xl bg-gray-50/70 px-3.5 py-2 transition focus-within:bg-white focus-within:shadow-inner"
+            >
+              <.input
+                type="textarea"
+                name="q"
+                value={@query}
+                placeholder={@placeholder || "Saisissez une adresse"}
+                phx-debounce="300"
+                rows="2"
+                phx-hook="AutosizeTextarea"
+                id={@id <> "-textarea"}
+                class="w-full resize-none border-0 bg-transparent p-0 text-base leading-tight text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-0 sm:text-lg"
+              />
+            </.form>
+
+            <div
+              :if={@loading or (is_list(@suggestions) and @suggestions != []) or @error}
+              class="flex flex-col items-end gap-3"
+            >
+              <span
+                :if={@loading}
+                class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600"
+              >
+                <.icon name="hero-arrow-path" class="h-4 w-4 animate-spin" /> Recherche…
+              </span>
+              <span
+                :if={!@loading and is_list(@suggestions) and @suggestions != []}
+                class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600"
+              >
+                <.icon name="hero-sparkles" class="h-4 w-4" />
+                {Enum.count(@suggestions)} suggestions
+              </span>
+              <span
+                :if={!@loading and @error}
+                class="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600"
+              >
+                <.icon name="hero-exclamation-triangle" class="h-4 w-4" /> Erreur
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div
         :if={@open}
-        class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-auto"
+        class="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-20 overflow-hidden rounded-2xl border border-gray-200 bg-white/95 shadow-[0_28px_60px_rgba(15,23,42,0.18)] backdrop-blur"
       >
-        <div :if={@loading} class="p-3 text-sm text-gray-500">Recherche…</div>
-        <div :if={!@loading and @error} class="p-3 text-sm text-red-600">{@error}</div>
-        <ul
-          :if={!@loading and is_list(@suggestions) and @suggestions != []}
-          class="divide-y divide-gray-100"
+        <div
+          :if={@loading}
+          class="flex items-center gap-2 px-5 py-4 text-sm font-medium text-blue-600"
         >
-          <li
-            :for={s <- @suggestions}
-            class="px-3 py-2 cursor-pointer hover:bg-gray-50"
-            phx-click="pick"
-            phx-value-label={s.display_name}
-            phx-value-lat={s.lat}
-            phx-value-lon={s.lon}
-            phx-target={@myself}
-          >
-            <div class="text-sm text-gray-900 truncate">{s.display_name}</div>
-          </li>
-        </ul>
-        <div :if={!@loading and @suggestions == [] and @query != ""} class="p-3 text-sm text-gray-500">
-          Aucun résultat
+          <.icon name="hero-arrow-path" class="h-4 w-4 animate-spin" /> Recherche en cours…
+        </div>
+        <div
+          :if={!@loading and @error}
+          class="flex items-center gap-2 px-5 py-4 text-sm font-medium text-red-600"
+        >
+          <.icon name="hero-exclamation-triangle" class="h-4 w-4" />
+          {@error}
+        </div>
+        <div
+          :if={!@loading and is_list(@suggestions) and @suggestions != []}
+          class="max-h-72 overflow-y-auto"
+        >
+          <ul class="divide-y divide-gray-100">
+            <li
+              :for={s <- @suggestions}
+              class="cursor-pointer px-5 py-3 transition hover:bg-blue-50/80"
+              phx-click="pick"
+              phx-value-label={s.display_name}
+              phx-value-lat={s.lat}
+              phx-value-lon={s.lon}
+              phx-target={@myself}
+            >
+              <div class="text-sm font-medium text-gray-900">
+                {s.display_name}
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div
+          :if={!@loading and @suggestions == [] and @query != ""}
+          class="px-5 py-4 text-sm text-gray-500"
+        >
+          Aucun résultat pour cette recherche
         </div>
       </div>
     </div>
@@ -115,12 +175,25 @@ defmodule MegamoveWeb.AddressAutocompleteComponent do
   end
 
   @impl true
+  def handle_event("dismiss", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:open, false)
+     |> assign(:loading, false)
+     |> assign(:suggestions, [])
+     |> assign(:error, nil)}
+  end
+
+  @impl true
   def handle_event("pick", %{"label" => label, "lat" => lat, "lon" => lon}, socket) do
     latf = to_float(lat)
     lonf = to_float(lon)
 
     # Notifie directement le parent (LiveView) en précisant la source (id du composant)
-    send(self(), {:address_selected, %{id: socket.assigns.id, label: label, lat: latf, lon: lonf}})
+    send(
+      self(),
+      {:address_selected, %{id: socket.assigns.id, label: label, lat: latf, lon: lonf}}
+    )
 
     {:noreply,
      socket

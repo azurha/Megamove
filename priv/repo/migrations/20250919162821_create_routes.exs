@@ -22,10 +22,12 @@ defmodule Megamove.Repo.Migrations.CreateRoutes do
     create index(:routes, [:org_id, :computed_at])
 
     # Contraintes CHECK
-    create constraint(:routes, :context_type_check, 
-      check: "context_type IN ('transport_request', 'booking', 'assignment')")
-    
-    create constraint(:routes, :profile_check, 
-      check: "profile IN ('auto', 'truck', 'bicycle', 'pedestrian')")
+    create constraint(:routes, :context_type_check,
+             check: "context_type IN ('transport_request', 'booking', 'assignment')"
+           )
+
+    create constraint(:routes, :profile_check,
+             check: "profile IN ('auto', 'truck', 'bicycle', 'pedestrian')"
+           )
   end
 end

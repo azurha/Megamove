@@ -120,7 +120,17 @@ const MapHook = {
     markers.forEach(m => {
       if (typeof m.lat === "number" && typeof m.lon === "number") {
         const ll = [m.lat, m.lon]
-        const marker = L.marker(ll)
+        const markerOptions = {}
+        if (m.color && typeof m.color === "string") {
+          markerOptions.icon = L.divIcon({
+            className: "mm-map-badge-marker",
+            html: `<span class="mm-pin" style="--mm-pin-color: ${m.color}"></span>`,
+            iconSize: [24, 36],
+            iconAnchor: [12, 36],
+            tooltipAnchor: [0, -28]
+          })
+        }
+        const marker = L.marker(ll, markerOptions)
         if (m.label) marker.bindTooltip(String(m.label))
         marker.addTo(this.markerLayer)
         bounds.push(ll)
@@ -152,10 +162,54 @@ const MapHook = {
     }
   }
 }
+
+const AddressAutocompleteHook = {
+  mounted() {
+    this.handleOutsideClick = this.handleOutsideClick.bind(this)
+    this.handleKeyDown = this.handleKeyDown.bind(this)
+    document.addEventListener("pointerdown", this.handleOutsideClick, true)
+    document.addEventListener("keydown", this.handleKeyDown)
+  },
+  destroyed() {
+    document.removeEventListener("pointerdown", this.handleOutsideClick, true)
+    document.removeEventListener("keydown", this.handleKeyDown)
+  },
+  handleOutsideClick(event) {
+    if (!this.el.contains(event.target)) {
+      this.pushEventTo(this.el, "dismiss", {})
+    }
+  },
+  handleKeyDown(event) {
+    if (event.key === "Escape" || event.key === "Esc") {
+      this.pushEventTo(this.el, "dismiss", {})
+    }
+  }
+}
+
+const AutosizeTextareaHook = {
+  mounted() {
+    this.resize = this.resize.bind(this)
+    this.el.style.overflow = "hidden"
+    this.resize()
+    this.el.addEventListener("input", this.resize)
+  },
+  updated() {
+    this.resize()
+  },
+  destroyed() {
+    this.el.removeEventListener("input", this.resize)
+  },
+  resize() {
+    const el = this.el
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = `${Math.max(el.scrollHeight, 44)}px`
+  }
+}
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-const hooks = {...colocatedHooks, Map: MapHook}
+const hooks = {...colocatedHooks, Map: MapHook, AddressAutocomplete: AddressAutocompleteHook, AutosizeTextarea: AutosizeTextareaHook}
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},

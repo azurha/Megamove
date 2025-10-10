@@ -7,6 +7,7 @@ defmodule Megamove.Accounts do
   alias Megamove.Repo
 
   alias Megamove.Accounts.{User, UserToken, UserNotifier}
+  alias Megamove.Organizations
 
   ## Database getters
 
@@ -82,8 +83,22 @@ defmodule Megamove.Accounts do
 
   """
   def register_user(attrs) do
+    # Récupère l'organisation par défaut (créée par la migration), sinon la crée
+    default_org =
+      Organizations.get_organization_by_slug("default-org") ||
+        case Organizations.create_organization(%{
+               name: "Organisation par défaut",
+               slug: "default-org",
+               org_type: :platform
+             }) do
+          {:ok, org} -> org
+          # En cas d'erreur concurrente ou autre, on retente une lecture simple
+          _ -> Organizations.get_organization_by_slug("default-org")
+        end
+
     %User{}
     |> User.email_changeset(attrs)
+    |> Ecto.Changeset.put_change(:org_id, default_org && default_org.id)
     |> Repo.insert()
   end
 

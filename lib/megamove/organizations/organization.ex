@@ -34,13 +34,27 @@ defmodule Megamove.Organizations.Organization do
   def changeset(organization, attrs) do
     organization
     |> cast(attrs, [
-      :name, :slug, :org_type, :address, :city, :postal_code, :country,
-      :phone, :email, :website, :vat_number, :siret, :is_active, :settings
+      :name,
+      :slug,
+      :org_type,
+      :address,
+      :city,
+      :postal_code,
+      :country,
+      :phone,
+      :email,
+      :website,
+      :vat_number,
+      :siret,
+      :is_active,
+      :settings
     ])
     |> validate_required([:name, :slug, :org_type, :country])
     |> validate_inclusion(:org_type, @org_types)
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+\.[^\s]+$/, message: "doit être un email valide")
-    |> validate_format(:website, ~r/^https?:\/\/.+/, message: "doit commencer par http:// ou https://")
+    |> validate_format(:website, ~r/^https?:\/\/.+/,
+      message: "doit commencer par http:// ou https://"
+    )
     |> validate_length(:name, min: 2, max: 255)
     |> validate_length(:slug, min: 2, max: 100)
     |> validate_length(:city, max: 100)

@@ -24,7 +24,8 @@ defmodule Megamove.Repo.Migrations.CreateQuotes do
     create index(:quotes, [:carrier_id])
 
     # Contrainte CHECK pour status
-    create constraint(:quotes, :status_check, 
-      check: "status IN ('proposed', 'withdrawn', 'accepted', 'expired', 'rejected')")
+    create constraint(:quotes, :status_check,
+             check: "status IN ('proposed', 'withdrawn', 'accepted', 'expired', 'rejected')"
+           )
   end
 end

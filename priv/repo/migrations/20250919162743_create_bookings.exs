@@ -20,7 +20,8 @@ defmodule Megamove.Repo.Migrations.CreateBookings do
     create index(:bookings, [:booked_by_user_id])
 
     # Contrainte CHECK pour status
-    create constraint(:bookings, :status_check, 
-      check: "status IN ('booked', 'in_transit', 'delivered', 'cancelled', 'failed')")
+    create constraint(:bookings, :status_check,
+             check: "status IN ('booked', 'in_transit', 'delivered', 'cancelled', 'failed')"
+           )
   end
 end

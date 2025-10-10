@@ -29,7 +29,15 @@ defmodule Megamove.Places.Place do
   def changeset(place, attrs) do
     place
     |> cast(attrs, [
-      :name, :address, :city, :postal_code, :country, :lat, :lng, :geohash, :organization_id
+      :name,
+      :address,
+      :city,
+      :postal_code,
+      :country,
+      :lat,
+      :lng,
+      :geohash,
+      :organization_id
     ])
     |> validate_required([:name, :address, :city, :country, :organization_id])
     |> validate_length(:name, min: 2, max: 255)
@@ -50,7 +58,8 @@ defmodule Megamove.Places.Place do
     # Pour l'instant, on utilise une implémentation simple
     # En production, on pourrait utiliser une librairie comme :geohash
     geohash = "#{trunc(lat * 1000)}_#{trunc(lng * 1000)}"
-    String.slice(geohash, 0, 12)  # Limiter à 12 caractères
+    # Limiter à 12 caractères
+    String.slice(geohash, 0, 12)
   end
 
   @doc """
@@ -60,7 +69,8 @@ defmodule Megamove.Places.Place do
     distance_between(lat1, lng1, lat2, lng2)
   end
 
-  def distance_between(lat1, lng1, lat2, lng2) when is_number(lat1) and is_number(lng1) and is_number(lat2) and is_number(lng2) do
+  def distance_between(lat1, lng1, lat2, lng2)
+      when is_number(lat1) and is_number(lng1) and is_number(lat2) and is_number(lng2) do
     # Rayon de la Terre en kilomètres
     r = 6371
 
@@ -75,9 +85,10 @@ defmodule Megamove.Places.Place do
     dlng = lng2_rad - lng1_rad
 
     # Formule de Haversine
-    a = :math.sin(dlat / 2) * :math.sin(dlat / 2) +
+    a =
+      :math.sin(dlat / 2) * :math.sin(dlat / 2) +
         :math.cos(lat1_rad) * :math.cos(lat2_rad) *
-        :math.sin(dlng / 2) * :math.sin(dlng / 2)
+          :math.sin(dlng / 2) * :math.sin(dlng / 2)
 
     c = 2 * :math.atan2(:math.sqrt(a), :math.sqrt(1 - a))
 

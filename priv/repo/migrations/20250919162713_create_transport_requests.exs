@@ -24,16 +24,22 @@ defmodule Megamove.Repo.Migrations.CreateTransportRequests do
       add :updated_at, :utc_datetime, null: false
     end
 
-    create unique_index(:transport_requests, [:org_id, :reference], where: "reference IS NOT NULL")
+    create unique_index(:transport_requests, [:org_id, :reference],
+             where: "reference IS NOT NULL"
+           )
+
     create index(:transport_requests, [:org_id, :status])
     create index(:transport_requests, [:org_id, :inserted_at])
     create index(:transport_requests, [:created_by_user_id])
 
     # Contraintes CHECK
-    create constraint(:transport_requests, :status_check, 
-      check: "status IN ('draft', 'published', 'quoted', 'booked', 'cancelled', 'completed')")
-    
-    create constraint(:transport_requests, :shipment_type_check, 
-      check: "shipment_type IN ('parcel', 'pallet', 'full_truck', 'container', 'other')")
+    create constraint(:transport_requests, :status_check,
+             check:
+               "status IN ('draft', 'published', 'quoted', 'booked', 'cancelled', 'completed')"
+           )
+
+    create constraint(:transport_requests, :shipment_type_check,
+             check: "shipment_type IN ('parcel', 'pallet', 'full_truck', 'container', 'other')"
+           )
   end
 end

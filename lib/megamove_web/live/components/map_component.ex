@@ -6,7 +6,7 @@ defmodule MegamoveWeb.MapComponent do
 
   Attributs:
   - id (obligatoire)
-  - markers: liste de %{lat: float, lon: float, label?: String.t}
+  - markers: liste de %{lat: float, lon: float, label?: String.t, color?: String.t}
   - polylines: liste de %{shape: String.t | [[lat, lon]], color?: String.t, weight?: integer}
   - fit: bool (par défaut true)
   """

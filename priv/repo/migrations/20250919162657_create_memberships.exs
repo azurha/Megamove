@@ -16,7 +16,8 @@ defmodule Megamove.Repo.Migrations.CreateMemberships do
     create index(:memberships, [:user_id])
 
     # Contrainte CHECK pour org_role
-    create constraint(:memberships, :org_role_check, 
-      check: "org_role IN ('owner', 'admin', 'member', 'viewer')")
+    create constraint(:memberships, :org_role_check,
+             check: "org_role IN ('owner', 'admin', 'member', 'viewer')"
+           )
   end
 end
