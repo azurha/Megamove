@@ -158,7 +158,7 @@ const MapHook = {
     })
 
     if (fit && bounds.length > 0) {
-      this.map.fitBounds(bounds, {padding: [20, 20]})
+      this.map.fitBounds(bounds, {padding: [20, 20], maxZoom: 14})
     }
   }
 }

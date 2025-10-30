@@ -1,0 +1,204 @@
+defmodule MegamoveWeb.HomeComponents.Default do
+  use MegamoveWeb, :live_component
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div>
+      <div class="left-[40rem] fixed inset-y-0 right-0 z-0 hidden lg:block xl:left-[50rem]">
+        <svg
+          viewBox="0 0 1480 957"
+          fill="none"
+          aria-hidden="true"
+          class="absolute inset-0 h-full w-full"
+          preserveAspectRatio="xMinYMid slice"
+        >
+          <path fill="#1E3A5F" d="M0 0h1480v957H0z" />
+          <path
+            d="M137.542 466.27c-582.851-48.41-988.806-82.127-1608.412 658.2l67.39 810 3083.15-256.51L1535.94-49.622l-98.36 8.183C1269.29 281.468 734.115 515.799 146.47 467.012l-8.928-.742Z"
+            fill="#61A0FF"
+          />
+          <path
+            d="M371.028 528.664C-169.369 304.988-545.754 149.198-1361.45 665.565l-182.58 792.025 3014.73 694.98 389.42-1689.25-96.18-22.171C1505.28 697.438 924.153 757.586 379.305 532.09l-8.277-3.426Z"
+            fill="#35C979"
+          />
+          <path
+            d="M359.326 571.714C-104.765 215.795-428.003-32.102-1349.55 255.554l-282.3 1224.596 3047.04 722.01 312.24-1354.467C1411.25 1028.3 834.355 935.995 366.435 577.166l-7.109-5.452Z"
+            fill="#61A0FF"
+            fill-opacity=".6"
+          />
+          <path
+            d="M1593.87 1236.88c-352.15 92.63-885.498-145.85-1244.602-613.557l-5.455-7.105C-12.347 152.31-260.41-170.8-1225-131.458l-368.63 1599.048 3057.19 704.76 130.31-935.47Z"
+            fill="#35C979"
+            fill-opacity=".2"
+          />
+          <path
+            d="M1411.91 1526.93c-363.79 15.71-834.312-330.6-1085.883-863.909l-3.822-8.102C72.704 125.95-101.074-242.476-1052.01-408.907l-699.85 1484.267 2837.75 1338.01 326.02-886.44Z"
+            fill="#1E3A5F"
+            fill-opacity=".2"
+          />
+          <path
+            d="M1116.26 1863.69c-355.457-78.98-720.318-535.27-825.287-1115.521l-1.594-8.816C185.286 163.833 112.786-237.016-762.678-643.898L-1822.83 608.665 571.922 2635.55l544.338-771.86Z"
+            fill="#61A0FF"
+            fill-opacity=".2"
+          />
+        </svg>
+      </div>
+      <div class="px-4 py-10 sm:px-6 sm:py-28 lg:px-8 xl:px-28 xl:py-32">
+        <div class="mx-auto max-w-xl lg:mx-0">
+          <div class="flex items-center gap-4">
+            <img
+              src={~p"/images/logo_Mega_Move.png"}
+              alt="MegaMove Logo"
+              class="h-16 w-auto"
+            />
+            <div>
+              <h1 class="text-2xl font-bold text-[#1E3A5F]">MegaMove</h1>
+              <p class="text-sm text-[#61A0FF] font-medium">Transport simplifié</p>
+            </div>
+          </div>
+          <div class="mt-10 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold text-[#1E3A5F]">Plateforme de transport</span>
+              <span class="badge badge-sm bg-[#35C979] text-white">Beta</span>
+            </div>
+            <Layouts.theme_toggle />
+          </div>
+
+          <p class="text-[2rem] mt-4 font-semibold leading-10 tracking-tighter text-balance text-[#1E3A5F]">
+            Transportez vos biens volumineux en toute simplicité.
+          </p>
+          <p class="mt-4 leading-7 text-gray-600">
+            Connectez-vous avec des transporteurs professionnels pour vos voitures, motos, colis lourds et plus encore. Géolocalisation intelligente, devis optimisés et paiement sécurisé.
+          </p>
+          <div class="flex">
+            <div class="w-full sm:w-auto">
+              <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+                <a
+                  href="/shipments/new"
+                  class="group relative rounded-box px-6 py-4 text-sm font-semibold leading-6 sm:py-6"
+                >
+                  <span class="absolute inset-0 rounded-box bg-[#1E3A5F] transition group-hover:bg-[#61A0FF] sm:group-hover:scale-105">
+                  </span>
+                  <span class="relative flex items-center gap-4 sm:flex-col text-white">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" class="h-6 w-6">
+                      <path
+                        d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    Créer une demande
+                  </span>
+                </a>
+                <a
+                  href="/carriers"
+                  class="group relative rounded-box px-6 py-4 text-sm font-semibold leading-6 sm:py-6"
+                >
+                  <span class="absolute inset-0 rounded-box bg-[#35C979] transition group-hover:bg-[#2BA865] sm:group-hover:scale-105">
+                  </span>
+                  <span class="relative flex items-center gap-4 sm:flex-col text-white">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" class="h-6 w-6">
+                      <path
+                        d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3M8 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3M8 3h8"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    Devenir transporteur
+                  </span>
+                </a>
+                <a
+                  href="/about"
+                  class="group relative rounded-box px-6 py-4 text-sm font-semibold leading-6 sm:py-6"
+                >
+                  <span class="absolute inset-0 rounded-box bg-[#61A0FF] transition group-hover:bg-[#4A8AE6] sm:group-hover:scale-105">
+                  </span>
+                  <span class="relative flex items-center gap-4 sm:flex-col text-white">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" class="h-6 w-6">
+                      <path
+                        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    Comment ça marche
+                  </span>
+                </a>
+              </div>
+              <div class="mt-10 grid grid-cols-1 gap-y-4 text-sm leading-6 text-gray-600 sm:grid-cols-2">
+                <div>
+                  <a
+                    href="/help"
+                    class="group -mx-2 -my-0.5 inline-flex items-center gap-3 rounded-lg px-2 py-0.5 hover:bg-[#F5F7FA] hover:text-[#1E3A5F]"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      class="h-4 w-4 fill-[#61A0FF] group-hover:fill-[#1E3A5F]"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
+                    </svg>
+                    Centre d'aide
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="/contact"
+                    class="group -mx-2 -my-0.5 inline-flex items-center gap-3 rounded-lg px-2 py-0.5 hover:bg-[#F5F7FA] hover:text-[#1E3A5F]"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      class="h-4 w-4 fill-[#61A0FF] group-hover:fill-[#1E3A5F]"
+                    >
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                    Nous contacter
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="/pricing"
+                    class="group -mx-2 -my-0.5 inline-flex items-center gap-3 rounded-lg px-2 py-0.5 hover:bg-[#F5F7FA] hover:text-[#1E3A5F]"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      class="h-4 w-4 fill-[#61A0FF] group-hover:fill-[#1E3A5F]"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                    Tarifs
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="/security"
+                    class="group -mx-2 -my-0.5 inline-flex items-center gap-3 rounded-lg px-2 py-0.5 hover:bg-[#F5F7FA] hover:text-[#1E3A5F]"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      class="h-4 w-4 fill-[#61A0FF] group-hover:fill-[#1E3A5F]"
+                    >
+                      <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11.5C15.4,11.5 16,12.4 16,13V16C16,16.6 15.6,17 15,17H9C8.4,17 8,16.6 8,16V13C8,12.4 8.4,11.5 9,11.5V10C9,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.2,9.2 10.2,10V11.5H13.8V10C13.8,9.2 12.8,8.2 12,8.2Z" />
+                    </svg>
+                    Sécurité
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+end

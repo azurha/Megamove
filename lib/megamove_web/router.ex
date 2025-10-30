@@ -19,8 +19,6 @@ defmodule MegamoveWeb.Router do
 
   scope "/", MegamoveWeb do
     pipe_through :browser
-
-    get "/", PageController, :home
   end
 
   # Other scopes may use custom stacks.
@@ -54,6 +52,7 @@ defmodule MegamoveWeb.Router do
       on_mount: [{MegamoveWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+      live "/logiciel", HomeLive, :index
     end
 
     post "/users/update-password", UserSessionController, :update_password
@@ -64,6 +63,7 @@ defmodule MegamoveWeb.Router do
 
     live_session :current_user,
       on_mount: [{MegamoveWeb.UserAuth, :mount_current_scope}] do
+      live "/", HomeLive, :index
       live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new

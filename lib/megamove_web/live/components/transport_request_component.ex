@@ -62,7 +62,7 @@ defmodule MegamoveWeb.TransportRequestComponent do
         <!-- Section des adresses -->
         <div class="flex-1 space-y-4">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Demande de Transport</h3>
-          
+
     <!-- Adresse de départ -->
           <div>
             <label class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -74,7 +74,7 @@ defmodule MegamoveWeb.TransportRequestComponent do
               placeholder="12 rue de l'Aubépine 32458 Flétri-le-Pinçon"
             />
           </div>
-          
+
     <!-- Adresse d'arrivée -->
           <div>
             <label class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -86,7 +86,7 @@ defmodule MegamoveWeb.TransportRequestComponent do
               placeholder="2 Avenue des Marronniers 21000 Dijon"
             />
           </div>
-          
+
     <!-- Checkbox poids lourd -->
           <div class="flex items-center">
             <input
@@ -101,13 +101,13 @@ defmodule MegamoveWeb.TransportRequestComponent do
               Transport en poids lourd
             </label>
           </div>
-          
+
     <!-- Erreurs -->
           <div :if={@error} class="pt-2 text-sm text-red-600">{@error}</div>
-          
+
     <!-- Les libellés complets sont désormais affichés directement dans les champs ci-dessus -->
         </div>
-        
+
     <!-- Section carte -->
         <div class="flex-1">
           <div class="h-full">
@@ -130,6 +130,8 @@ defmodule MegamoveWeb.TransportRequestComponent do
   def handle_event("toggle_heavy_vehicle", _params, socket) do
     new_flag = !socket.assigns.heavy_vehicle
     socket = socket |> assign(:heavy_vehicle, new_flag) |> assign(:error, nil)
+    # Notifier la LiveView parente de la mise à jour
+    send(self(), {:heavy_vehicle, new_flag})
 
     case {socket.assigns.departure_address, socket.assigns.arrival_address} do
       {%{lat: s_lat, lon: s_lon}, %{lat: e_lat, lon: e_lon}} ->
