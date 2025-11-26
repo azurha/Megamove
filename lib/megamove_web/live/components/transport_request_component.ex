@@ -22,7 +22,8 @@ defmodule MegamoveWeb.TransportRequestComponent do
      |> assign(:markers, [])
      |> assign(:polylines, [])
      |> assign(:loading, false)
-     |> assign(:error, nil)}
+     |> assign(:error, nil)
+     |> assign(:distance_km, nil)}
   end
 
   @impl true
@@ -122,6 +123,15 @@ defmodule MegamoveWeb.TransportRequestComponent do
           </div>
         </div>
       </div>
+      <div class="mt-6">
+        <button
+          id={@id <> "-create-transport-request"}
+          phx-click="create_transport_request"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Créer la demande
+        </button>
+      </div>
     </div>
     """
   end
@@ -140,11 +150,13 @@ defmodule MegamoveWeb.TransportRequestComponent do
         case ValhallaService.route([{s_lat, s_lon}, {e_lat, e_lon}], costing: costing) do
           {:ok, result, _meta} ->
             shape = extract_shape(result)
-            {:noreply, socket |> apply_shape(shape)}
+            distance_km = extract_distance(result)
+            {:noreply, socket |> apply_shape(shape) |> assign(:distance_km, distance_km)}
 
           {:ok, result} ->
             shape = extract_shape(result)
-            {:noreply, socket |> apply_shape(shape)}
+            distance_km = extract_distance(result)
+            {:noreply, socket |> apply_shape(shape) |> assign(:distance_km, distance_km)}
 
           {:error, {:http_error, status, _body, _url}} ->
             {:noreply,
@@ -198,13 +210,14 @@ defmodule MegamoveWeb.TransportRequestComponent do
         markers
       end
 
-    # Préserver une polyline existante (issue de Valhalla) et ne tracer une ligne droite
-    # que s'il n'existe pas encore de polyline calculée
+    # Préserver une polyline existante (issue de Valhalla) et tracer une ligne droite
+    # si aucune polyline calculée n'existe (même en cas d'erreur)
     polylines =
       cond do
         socket.assigns.polylines != [] ->
           socket.assigns.polylines
 
+        # Tracer une ligne droite si les deux adresses sont définies
         socket.assigns.departure_address && socket.assigns.arrival_address ->
           [
             %{
@@ -232,9 +245,39 @@ defmodule MegamoveWeb.TransportRequestComponent do
         costing = if(socket.assigns.heavy_vehicle, do: "truck", else: "auto")
 
         case ValhallaService.route([{s_lat, s_lon}, {e_lat, e_lon}], costing: costing) do
-          {:ok, result} -> apply_shape(socket, extract_shape(result))
-          {:ok, result, _meta} -> apply_shape(socket, extract_shape(result))
-          _ -> socket
+          {:ok, result} ->
+            shape = extract_shape(result)
+            distance_km = extract_distance(result)
+
+            socket
+            |> apply_shape(shape)
+            |> assign(:distance_km, distance_km)
+            |> assign(:error, if(shape == nil, do: "Aucun itinéraire trouvé", else: nil))
+
+          {:ok, result, _meta} ->
+            shape = extract_shape(result)
+            distance_km = extract_distance(result)
+
+            socket
+            |> apply_shape(shape)
+            |> assign(:distance_km, distance_km)
+            |> assign(:error, if(shape == nil, do: "Aucun itinéraire trouvé", else: nil))
+
+          {:error, {:http_error, status, body, _url}} ->
+            error_msg =
+              case body do
+                %{"error" => msg} -> "Erreur Valhalla: #{msg}"
+                _ -> "Erreur HTTP #{status} lors du calcul de l'itinéraire"
+              end
+
+            socket
+            |> assign(:polylines, [])
+            |> assign(:error, error_msg)
+
+          {:error, reason} ->
+            socket
+            |> assign(:polylines, [])
+            |> assign(:error, "Erreur lors du calcul de l'itinéraire: #{inspect(reason)}")
         end
 
       _ ->
@@ -251,9 +294,35 @@ defmodule MegamoveWeb.TransportRequestComponent do
     assign(socket, :polylines, [%{shape: shape, color: color, weight: weight}])
   end
 
-  defp extract_shape(%{"trip" => %{"legs" => [first_leg | _]}}) do
-    Map.get(first_leg, "shape")
+  defp extract_shape(%{"trip" => %{"legs" => legs}}) when is_list(legs) do
+    # Extraire toutes les shapes de tous les legs et les concaténer
+    shapes =
+      legs
+      |> Enum.map(&Map.get(&1, "shape"))
+      |> Enum.filter(&(&1 != nil and &1 != ""))
+
+    case shapes do
+      [] ->
+        nil
+
+      [single_shape] ->
+        single_shape
+
+      multiple_shapes ->
+        # Si plusieurs legs, on retourne la première shape pour l'instant
+        # Note: Pour vraiment concaténer, il faudrait décoder/réencoder les polylines
+        # mais pour la plupart des cas, un seul leg suffit
+        List.first(multiple_shapes)
+    end
   end
 
   defp extract_shape(_), do: nil
+
+  defp extract_distance(%{"trip" => %{"summary" => %{"length" => length}}})
+       when is_number(length) do
+    # La distance est en kilomètres dans la réponse Valhalla
+    Decimal.from_float(length)
+  end
+
+  defp extract_distance(_), do: nil
 end

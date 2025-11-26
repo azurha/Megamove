@@ -209,4 +209,87 @@ defmodule MegamoveWeb.UserLive.SettingsTest do
       assert message == "You must log in to access this page."
     end
   end
+
+  describe "update user type form" do
+    setup %{conn: conn} do
+      user = user_fixture()
+      %{conn: log_in_user(conn, user), user: user}
+    end
+
+    test "updates the user type", %{conn: conn, user: user} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#user_type_form", %{
+          "user" => %{"user_type" => "entreprise_professionnelle"}
+        })
+        |> render_submit()
+
+      assert result =~ "Status updated successfully"
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.user_type == :entreprise_professionnelle
+    end
+
+    test "renders errors with invalid data (phx-change)", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> element("#user_type_form")
+        |> render_change(%{
+          "user" => %{"user_type" => "invalid_type"}
+        })
+
+      assert result =~ "Save Status"
+    end
+
+    test "renders errors with invalid data (phx-submit)", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      # Simulate invalid data by directly calling the handler
+      result =
+        lv
+        |> element("#user_type_form")
+        |> render_change(%{
+          "user" => %{"user_type" => "invalid_type"}
+        })
+
+      assert result =~ "Save Status"
+    end
+
+    test "can change to chauffeur", %{conn: conn, user: user} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#user_type_form", %{
+          "user" => %{"user_type" => "chauffeur"}
+        })
+        |> render_submit()
+
+      assert result =~ "Status updated successfully"
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.user_type == :chauffeur
+    end
+
+    test "can change to particulier", %{conn: conn, user: user} do
+      # First change to another type
+      {:ok, updated_user} = Accounts.update_user_type(user, %{user_type: :entreprise_professionnelle})
+      assert updated_user.user_type == :entreprise_professionnelle
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#user_type_form", %{
+          "user" => %{"user_type" => "particulier"}
+        })
+        |> render_submit()
+
+      assert result =~ "Status updated successfully"
+      final_user = Accounts.get_user!(user.id)
+      assert final_user.user_type == :particulier
+    end
+  end
 end

@@ -298,10 +298,14 @@ defmodule MegamoveWeb.UserAuthTest do
 
     test "redirects when authentication is too old", %{conn: conn, user: user} do
       eleven_minutes_ago = DateTime.utc_now(:second) |> DateTime.add(-11, :minute)
-      user = %{user | authenticated_at: eleven_minutes_ago}
       user_token = Accounts.generate_user_session_token(user)
+      # Override the token's authenticated_at to be 11 minutes ago
+      override_token_authenticated_at(user_token, eleven_minutes_ago)
       {user, token_inserted_at} = Accounts.get_user_by_session_token(user_token)
-      assert DateTime.compare(token_inserted_at, user.authenticated_at) == :gt
+      # token_inserted_at should be >= user.authenticated_at (allowing for :eq due to timing)
+      assert DateTime.compare(token_inserted_at, user.authenticated_at) != :lt
+      # But user.authenticated_at should be old (11 minutes ago) because it comes from the token
+      assert DateTime.compare(user.authenticated_at, eleven_minutes_ago) == :eq
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       socket = %LiveView.Socket{

@@ -89,7 +89,8 @@ defmodule Megamove.Accounts do
         case Organizations.create_organization(%{
                name: "Organisation par défaut",
                slug: "default-org",
-               org_type: :platform
+               org_type: :platform,
+               country: "FR"
              }) do
           {:ok, org} -> org
           # En cas d'erreur concurrente ou autre, on retente une lecture simple
@@ -99,6 +100,7 @@ defmodule Megamove.Accounts do
     %User{}
     |> User.email_changeset(attrs)
     |> Ecto.Changeset.put_change(:org_id, default_org && default_org.id)
+    |> Ecto.Changeset.put_change(:user_type, :particulier)
     |> Repo.insert()
   end
 
@@ -189,6 +191,37 @@ defmodule Megamove.Accounts do
     |> update_user_and_delete_all_tokens()
   end
 
+  @doc """
+  Returns an `%Ecto.Changeset{}` for changing the user type.
+
+  ## Examples
+
+      iex> change_user_type(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user_type(user, attrs \\ %{}) do
+    User.user_type_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the user type.
+
+  ## Examples
+
+      iex> update_user_type(user, %{user_type: :entreprise_professionnelle})
+      {:ok, %User{}}
+
+      iex> update_user_type(user, %{user_type: :invalid})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_type(user, attrs) do
+    user
+    |> User.user_type_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """
@@ -198,6 +231,18 @@ defmodule Megamove.Accounts do
     {token, user_token} = UserToken.build_session_token(user)
     Repo.insert!(user_token)
     token
+  end
+
+  @doc """
+  Updates the authenticated_at timestamp of an existing session token.
+  """
+  def update_session_token_authenticated_at(token) do
+    now = DateTime.utc_now(:second)
+
+    Repo.update_all(
+      from(ut in UserToken, where: ut.token == ^token and ut.context == "session"),
+      set: [authenticated_at: now]
+    )
   end
 
   @doc """

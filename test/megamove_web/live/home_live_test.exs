@@ -40,13 +40,55 @@ defmodule MegamoveWeb.HomeLiveTest do
     test "crée une demande minimale avec 2 arrêts", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/")
 
-      send(view.pid, {:address_selected, %{id: "transport-request-demo-departure", label: "Paris", lat: 48.8566, lon: 2.3522}})
-      send(view.pid, {:address_selected, %{id: "transport-request-demo-arrival", label: "Lyon", lat: 45.764, lon: 4.8357}})
+      send(
+        view.pid,
+        {:address_selected,
+         %{id: "transport-request-demo-departure", label: "Paris", lat: 48.8566, lon: 2.3522}}
+      )
 
-      assert render_click(element(view, "#create-transport-request")) =~ "Demande de transport créée."
+      send(
+        view.pid,
+        {:address_selected,
+         %{id: "transport-request-demo-arrival", label: "Lyon", lat: 45.764, lon: 4.8357}}
+      )
+
+      assert render_click(element(view, "#transport-request-demo-create-transport-request")) =~
+               "Demande de transport créée."
 
       assert Repo.aggregate(TransportRequest, :count) == 1
       assert Repo.aggregate(TransportRequestStop, :count) == 2
+    end
+  end
+
+  describe "liste des demandes (connecté)" do
+    setup :register_and_log_in_user
+
+    test "affiche la section Mes demandes vide puis listée après création", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      assert has_element?(view, "h3", "Mes demandes")
+      assert has_element?(view, "div", "Aucune demande pour le moment.")
+
+      send(
+        view.pid,
+        {:address_selected,
+         %{id: "transport-request-demo-departure", label: "Paris", lat: 48.8566, lon: 2.3522}}
+      )
+
+      send(
+        view.pid,
+        {:address_selected,
+         %{id: "transport-request-demo-arrival", label: "Lyon", lat: 45.764, lon: 4.8357}}
+      )
+
+      assert render_click(element(view, "#transport-request-demo-create-transport-request")) =~
+               "Demande de transport créée."
+
+      # Re-monte la page pour recharger la liste depuis la DB
+      {:ok, view2, _html2} = live(conn, ~p"/")
+
+      assert has_element?(view2, "h3", "Mes demandes")
+      assert has_element?(view2, "a", "Voir")
     end
   end
 end

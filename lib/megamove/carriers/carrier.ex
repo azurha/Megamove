@@ -22,6 +22,8 @@ defmodule Megamove.Carriers.Carrier do
     # Relation avec l'organisation
     belongs_to :organization, Megamove.Organizations.Organization, foreign_key: :org_id
 
+    has_many :quotes, Megamove.Quotes.Quote
+
     timestamps(type: :utc_datetime)
   end
 

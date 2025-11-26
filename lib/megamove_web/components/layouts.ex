@@ -60,11 +60,13 @@ defmodule MegamoveWeb.Layouts do
           <li>
             <.theme_toggle />
           </li>
-          <li>
-            <a href="/shipments/new" class="btn bg-[#1E3A5F] text-white hover:bg-[#61A0FF]">
-              Créer une demande <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
+          <%= if @current_scope do %>
+            <li>
+              <a href={~p"/users/settings"} class="btn bg-[#1E3A5F] text-white hover:bg-[#61A0FF]">
+                <.icon name="hero-cog-6-tooth" class="size-5" />
+              </a>
+            </li>
+          <% end %>
         </ul>
       </div>
     </header>

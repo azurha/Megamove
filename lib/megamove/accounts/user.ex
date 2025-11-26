@@ -2,12 +2,15 @@ defmodule Megamove.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @user_types ~w[particulier entreprise_professionnelle chauffeur]a
+
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :user_type, Ecto.Enum, values: @user_types
 
     # Relation avec l'organisation
     belongs_to :organization, Megamove.Organizations.Organization, foreign_key: :org_id
@@ -131,5 +134,15 @@ defmodule Megamove.Accounts.User do
   def valid_password?(_, _) do
     Bcrypt.no_user_verify()
     false
+  end
+
+  @doc """
+  A user changeset for changing the user type.
+  """
+  def user_type_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:user_type])
+    |> validate_required([:user_type])
+    |> validate_inclusion(:user_type, @user_types)
   end
 end

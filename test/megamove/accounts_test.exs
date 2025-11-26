@@ -273,12 +273,20 @@ defmodule Megamove.AccountsTest do
       end
     end
 
-    test "duplicates the authenticated_at of given user in new token", %{user: user} do
-      user = %{user | authenticated_at: DateTime.add(DateTime.utc_now(:second), -3600)}
+    test "sets authenticated_at to now when creating a new token", %{user: user} do
+      old_authenticated_at = DateTime.add(DateTime.utc_now(:second), -3600)
+      user = %{user | authenticated_at: old_authenticated_at}
+      before = DateTime.utc_now(:second)
       token = Accounts.generate_user_session_token(user)
+      after_time = DateTime.utc_now(:second)
       assert user_token = Repo.get_by(UserToken, token: token)
-      assert user_token.authenticated_at == user.authenticated_at
-      assert DateTime.compare(user_token.inserted_at, user.authenticated_at) == :gt
+      # authenticated_at should be updated to now, not the old user.authenticated_at
+      assert user_token.authenticated_at != old_authenticated_at
+      # authenticated_at should be between before and after_time (allowing for :eq due to timing)
+      assert DateTime.compare(user_token.authenticated_at, before) != :lt
+      assert DateTime.compare(after_time, user_token.authenticated_at) != :lt
+      # inserted_at should be >= authenticated_at (allowing for :eq due to timing)
+      assert DateTime.compare(user_token.inserted_at, user_token.authenticated_at) != :lt
     end
   end
 
@@ -386,6 +394,64 @@ defmodule Megamove.AccountsTest do
       assert user_token.user_id == user.id
       assert user_token.sent_to == user.email
       assert user_token.context == "login"
+    end
+  end
+
+  describe "change_user_type/2" do
+    test "returns a user changeset" do
+      assert %Ecto.Changeset{} = changeset = Accounts.change_user_type(%User{})
+      assert changeset.required == [:user_type]
+    end
+
+    test "allows user_type to be set" do
+      changeset =
+        Accounts.change_user_type(
+          %User{},
+          %{
+            "user_type" => "entreprise_professionnelle"
+          }
+        )
+
+      assert changeset.valid?
+      assert get_change(changeset, :user_type) == :entreprise_professionnelle
+    end
+  end
+
+  describe "update_user_type/2" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "validates user_type", %{user: user} do
+      {:error, changeset} =
+        Accounts.update_user_type(user, %{
+          user_type: :invalid_type
+        })
+
+      assert %{user_type: ["is invalid"]} = errors_on(changeset)
+    end
+
+    test "updates the user type to particulier", %{user: user} do
+      {:ok, updated_user} = Accounts.update_user_type(user, %{user_type: :particulier})
+      assert updated_user.user_type == :particulier
+    end
+
+    test "updates the user type to entreprise_professionnelle", %{user: user} do
+      {:ok, updated_user} =
+        Accounts.update_user_type(user, %{user_type: :entreprise_professionnelle})
+
+      assert updated_user.user_type == :entreprise_professionnelle
+    end
+
+    test "updates the user type to chauffeur", %{user: user} do
+      {:ok, updated_user} = Accounts.update_user_type(user, %{user_type: :chauffeur})
+      assert updated_user.user_type == :chauffeur
+    end
+
+    test "persists the change in the database", %{user: user} do
+      {:ok, _updated_user} = Accounts.update_user_type(user, %{user_type: :chauffeur})
+      persisted_user = Accounts.get_user!(user.id)
+      assert persisted_user.user_type == :chauffeur
     end
   end
 

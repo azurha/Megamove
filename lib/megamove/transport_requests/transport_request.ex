@@ -9,7 +9,7 @@ defmodule Megamove.TransportRequests.TransportRequest do
   @primary_key {:id, :id, autogenerate: true}
   @foreign_key_type :id
 
-  @statuses ~w[draft published quoted booked cancelled completed]a
+  @statuses ~w[published quoted booked completed litige]a
   @shipment_types ~w[parcel pallet full_truck container other]a
 
   @type t :: %__MODULE__{}
@@ -29,9 +29,13 @@ defmodule Megamove.TransportRequests.TransportRequest do
     field :delivery_latest_at, :utc_datetime
     field :requested_vehicle_type, :string
     field :notes, :string
+    field :distance_km, :decimal
 
     belongs_to :organization, Megamove.Organizations.Organization, foreign_key: :org_id
     belongs_to :created_by_user, Megamove.Accounts.User, foreign_key: :created_by_user_id
+
+    has_many :quotes, Megamove.Quotes.Quote
+    has_many :messages, Megamove.Messages.Message
 
     timestamps(type: :utc_datetime)
   end
@@ -55,7 +59,8 @@ defmodule Megamove.TransportRequests.TransportRequest do
       :delivery_earliest_at,
       :delivery_latest_at,
       :requested_vehicle_type,
-      :notes
+      :notes,
+      :distance_km
     ])
     |> validate_required([:org_id, :created_by_user_id, :status, :shipment_type])
     |> validate_inclusion(:status, @statuses)

@@ -70,8 +70,7 @@ defmodule MegamoveWeb.ValhallaDemoLive do
             |> assign(:raw_response, raw_body)
             |> assign(:map_shape, shape)
             |> assign(:loading, false)
-
-          socket = socket
+            |> push_shape_update()
 
           {:noreply, socket}
 
@@ -85,8 +84,7 @@ defmodule MegamoveWeb.ValhallaDemoLive do
             |> assign(:raw_response, nil)
             |> assign(:map_shape, shape)
             |> assign(:loading, false)
-
-          socket = socket
+            |> push_shape_update()
 
           {:noreply, socket}
 
@@ -118,7 +116,8 @@ defmodule MegamoveWeb.ValhallaDemoLive do
      |> assign(:error, nil)
      |> assign(:request_url, nil)
      |> assign(:raw_response, nil)
-     |> assign(:map_shape, nil)}
+     |> assign(:map_shape, nil)
+     |> push_shape_update()}
   end
 
   defp format_coordinate({lat, lon}) do
@@ -146,8 +145,25 @@ defmodule MegamoveWeb.ValhallaDemoLive do
     end
   end
 
-  defp extract_shape(%{"trip" => %{"legs" => [first_leg | _]}}) do
-    Map.get(first_leg, "shape")
+  defp extract_shape(%{"trip" => %{"legs" => legs}}) when is_list(legs) do
+    # Extraire toutes les shapes de tous les legs
+    shapes =
+      legs
+      |> Enum.map(&Map.get(&1, "shape"))
+      |> Enum.filter(&(&1 != nil and &1 != ""))
+
+    case shapes do
+      [] ->
+        nil
+
+      [single_shape] ->
+        single_shape
+
+      multiple_shapes ->
+        # Si plusieurs legs, on retourne la première shape pour l'instant
+        # Note: Pour vraiment concaténer, il faudrait décoder/réencoder les polylines
+        List.first(multiple_shapes)
+    end
   end
 
   defp extract_shape(_), do: nil

@@ -17,7 +17,7 @@ defmodule MegamoveWeb.AddressDemoLive do
   end
 
   @impl true
-  def handle_info({:address_selected, {label, lat, lon}}, socket) do
+  def handle_info({:address_selected, %{label: label, lat: lat, lon: lon}}, socket) do
     {:noreply, assign(socket, :selected, %{label: label, lat: lat, lon: lon})}
   end
 

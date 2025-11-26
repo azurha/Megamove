@@ -62,6 +62,25 @@ defmodule MegamoveWeb.UserLive.Settings do
           Save Password
         </.button>
       </.form>
+
+      <div class="divider" />
+
+      <.form for={@user_type_form} id="user_type_form" phx-submit="update_user_type" phx-change="validate_user_type">
+        <.input
+          field={@user_type_form[:user_type]}
+          type="select"
+          label="Statut"
+          options={[
+            {"Particulier", :particulier},
+            {"Entreprise Professionnelle", :entreprise_professionnelle},
+            {"Chauffeur", :chauffeur}
+          ]}
+          required
+        />
+        <.button variant="primary" phx-disable-with="Saving...">
+          Save Status
+        </.button>
+      </.form>
     </Layouts.app>
     """
   end
@@ -84,12 +103,14 @@ defmodule MegamoveWeb.UserLive.Settings do
     user = socket.assigns.current_scope.user
     email_changeset = Accounts.change_user_email(user, %{}, validate_unique: false)
     password_changeset = Accounts.change_user_password(user, %{}, hash_password: false)
+    user_type_changeset = Accounts.change_user_type(user, %{})
 
     socket =
       socket
       |> assign(:current_email, user.email)
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
+      |> assign(:user_type_form, to_form(user_type_changeset))
       |> assign(:trigger_submit, false)
 
     {:ok, socket}
@@ -152,6 +173,39 @@ defmodule MegamoveWeb.UserLive.Settings do
 
       changeset ->
         {:noreply, assign(socket, password_form: to_form(changeset, action: :insert))}
+    end
+  end
+
+  def handle_event("validate_user_type", params, socket) do
+    %{"user" => user_params} = params
+
+    user_type_form =
+      socket.assigns.current_scope.user
+      |> Accounts.change_user_type(user_params)
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, user_type_form: user_type_form)}
+  end
+
+  def handle_event("update_user_type", params, socket) do
+    %{"user" => user_params} = params
+    user = socket.assigns.current_scope.user
+    true = Accounts.sudo_mode?(user)
+
+    case Accounts.update_user_type(user, user_params) do
+      {:ok, updated_user} ->
+        # Recharger l'utilisateur depuis la base de données pour avoir les dernières données
+        reloaded_user = Accounts.get_user!(updated_user.id)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Status updated successfully.")
+         |> assign(:current_scope, Megamove.Accounts.Scope.for_user(reloaded_user))
+         |> assign(:user_type_form, to_form(Accounts.change_user_type(reloaded_user, %{})))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, user_type_form: to_form(changeset, action: :insert))}
     end
   end
 end

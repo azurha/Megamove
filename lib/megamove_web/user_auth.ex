@@ -35,6 +35,11 @@ defmodule MegamoveWeb.UserAuth do
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
 
+    # Update authenticated_at of existing token if user is already logged in
+    if existing_token = get_session(conn, :user_token) do
+      Accounts.update_session_token_authenticated_at(existing_token)
+    end
+
     conn
     |> create_or_extend_session(user, params)
     |> redirect(to: user_return_to || signed_in_path(conn))
@@ -63,13 +68,23 @@ defmodule MegamoveWeb.UserAuth do
   Authenticates the user by looking into the session and remember me token.
 
   Will reissue the session token if it is older than the configured age.
+  Also updates authenticated_at on each request to keep sudo mode active.
   """
   def fetch_current_scope_for_user(conn, _opts) do
     with {token, conn} <- ensure_user_token(conn),
          {user, token_inserted_at} <- Accounts.get_user_by_session_token(token) do
+      # Update authenticated_at on each request to keep sudo mode active
+      Accounts.update_session_token_authenticated_at(token)
+
+      # Re-fetch user with updated authenticated_at for this request
+      updated_user = case Accounts.get_user_by_session_token(token) do
+        {u, _} -> u
+        _ -> user
+      end
+
       conn
-      |> assign(:current_scope, Scope.for_user(user))
-      |> maybe_reissue_user_session_token(user, token_inserted_at)
+      |> assign(:current_scope, Scope.for_user(updated_user))
+      |> maybe_reissue_user_session_token(updated_user, token_inserted_at)
     else
       nil -> assign(conn, :current_scope, Scope.for_user(nil))
     end
